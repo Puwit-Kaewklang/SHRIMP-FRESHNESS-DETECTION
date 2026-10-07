@@ -125,11 +125,16 @@ def get_data_loaders(
     batch_size: int = 32,
     seed: int = 42,
     split: Tuple[float, float, float] = (0.7, 0.15, 0.15),
-    num_workers: int = 0
+    num_workers: int = 0,
+    balance_classes: bool = True
 ):
     """
     Creates stratified Train, Validation, and Test PyTorch DataLoaders.
+    Optionally applies WeightedRandomSampler on the training set to address class imbalance.
     """
+    import numpy as np
+    from torch.utils.data import WeightedRandomSampler
+
     samples, class_names = collect_samples(data_dir)
     labels = [s[1] for s in samples]
 
@@ -154,9 +159,32 @@ def get_data_loaders(
     val_dataset = TransformedSubset(val_samples, transform=eval_transform)
     test_dataset = TransformedSubset(test_samples, transform=eval_transform)
 
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=torch.cuda.is_available()
-    )
+    if balance_classes:
+        train_labels = [s[1] for s in train_samples]
+        class_counts = np.bincount(train_labels)
+        class_weights = 1.0 / np.maximum(class_counts, 1)
+        sample_weights = [class_weights[l] for l in train_labels]
+        sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=len(sample_weights),
+            replacement=True
+        )
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            sampler=sampler,
+            num_workers=num_workers,
+            pin_memory=torch.cuda.is_available()
+        )
+    else:
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=num_workers,
+            pin_memory=torch.cuda.is_available()
+        )
+
     val_loader = DataLoader(
         val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=torch.cuda.is_available()
     )

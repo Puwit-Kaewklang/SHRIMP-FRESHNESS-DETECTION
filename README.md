@@ -1,15 +1,20 @@
-# 🦐 Shrimp Freshness CNN Classification System
-ระบบจำแนกภาพกุ้งสด / กุ้งไม่สด ด้วยสถาปัตยกรรม CNN 4 โมเดล (PyTorch & Google Colab)
+# 🦐 Shrimp Freshness CNN & Transformer Classification System
+ระบบจำแนกภาพกุ้งสด / กุ้งไม่สด ด้วยสถาปัตยกรรม CNN และ Vision Transformer 5 โมเดล (PyTorch & Google Colab)
 
 ---
 
 ## 📋 ภาพรวมโครงการ (Project Overview)
-โปรเจกต์นี้พัฒนาขึ้นเพื่อเปรียบเทียบประสิทธิภาพของสถาปัตยกรรม Deep Learning Convolutional Neural Networks (CNN) จำนวน 4 โมเดล ในการจำแนกความสดของกุ้ง (`fresh` vs `not_fresh`):
+โปรเจกต์นี้พัฒนาขึ้นเพื่อเปรียบเทียบประสิทธิภาพของสถาปัตยกรรม Deep Learning จำนวน 5 โมเดล (4 CNNs + 1 Vision Transformer) ในการจำแนกความสดของกุ้ง (`fresh` vs `not_fresh`):
 
 1. **Custom CNN:** โมเดล 4 Convolutional Blocks สร้างขึ้นเอง เทรนจาก Scratch เพื่อใช้เป็น Baseline
 2. **MobileNetV3-Large:** โมเดลขนาดเล็กและประมวลผลเร็ว (Transfer Learning) เหมาะสำหรับ Edge AI / Smart Camera
 3. **ResNet-50:** โมเดล Residual Connection ที่เป็นมาตรฐานสากลในงานวิจัยคอมพิวเตอร์วิทัศน์
 4. **EfficientNet-B0:** โมเดล Compound Scaling ที่ให้ความแม่นยำสูงต่อน้ำหนักโมเดล
+5. **Vision Transformer (ViT-B/16):** โมเดล Transformer สถาปัตยกรรม Self-Attention ระดับ State-of-the-art
+
+### ⚖️ การจัดการ Class Imbalance:
+* จัดการความไม่สมดุลของข้อมูล (`fresh` 886 ภาพ vs `not_fresh` 509 ภาพ) โดยใช้ **`WeightedRandomSampler`** ในชุด Train สุ่มตัวอย่างให้มีสัดส่วน 50:50 เท่ากัน
+* คงชุด Validation และ Test ไว้ตามสัดส่วนจริง เพื่อการวัดผลที่เที่ยงตรง ไม่เกิด Data Leakage หรือการประเมินที่หลอกตา
 
 ---
 

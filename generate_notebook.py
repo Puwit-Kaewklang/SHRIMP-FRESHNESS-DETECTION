@@ -39,18 +39,24 @@ def add_code(source):
     })
 
 # ----------------- CELL 1: HEADER -----------------
-add_md("""# 🦐 Deep Learning Pipeline: จำแนกภาพกุ้งสด / ไม่สด ด้วย CNN บน Google Colab
+add_md("""# 🦐 Deep Learning Pipeline: จำแนกภาพกุ้งสด / ไม่สด ด้วย CNN และ Vision Transformer บน Google Colab
 
-**เปรียบเทียบประสิทธิภาพ 4 สถาปัตยกรรม CNN:**
+**เปรียบเทียบประสิทธิภาพ 5 สถาปัตยกรรม (4 CNNs + 1 Vision Transformer):**
 1. **Custom CNN:** Baseline โมเดล 4 Convolutional blocks เทรนจากศูนย์ (Scratch)
 2. **MobileNetV3-Large:** Lightweight & Fast (Transfer Learning) เหมาะสำหรับ Edge Device
 3. **ResNet-50:** Residual Network มาตรฐานงานวิจัยคอมพิวเตอร์วิทัศน์
 4. **EfficientNet-B0:** Compound Scaling ให้ความแม่นยำสูงต่อน้ำหนักโมเดล
+5. **Vision Transformer (ViT-B/16):** Transformer สถาปัตยกรรม Self-Attention ระดับ State-of-the-art
+
+---
+### ⚖️ การจัดการ Class Imbalance (กุ้งสด 886 ภาพ vs ไม่สด 509 ภาพ):
+* ระบบใช้ **WeightedRandomSampler** ปรับสมดุลในชุด Train ให้ดึงมาเรียนรู้แบบ 50:50 เท่ากัน
+* คงชุด Validation และ Test ไว้ตามสัดส่วนจริง เพื่อการประเมินผลที่เที่ยงตรง 100%
 
 ---
 ### ⚙️ ขั้นตอนการเตรียมก่อนรัน (Pre-flight Checklist):
 1. ไปที่เมนู **Runtime** -> **Change runtime type** -> เลือก **T4 GPU**
-2. ตรวจสอบว่าไฟล์ `shrimp_raw_jpg.zip` อยู่ใน Google Drive ที่:
+2. ตรวจสอบว่าไฟล์หรือโฟลเดอร์ `shrimp_raw_jpg.zip` อยู่ใน Google Drive ที่:
    `MyDrive/shrimp_raw_jpg.zip`
 """)
 
@@ -215,19 +221,56 @@ eval_transform = transforms.Compose([
 ])
 
 BATCH_SIZE = 32
-train_loader = DataLoader(ShrimpDataset(train_samples, train_transform), batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
-val_loader = DataLoader(ShrimpDataset(val_samples, eval_transform), batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
-test_loader = DataLoader(ShrimpDataset(test_samples, eval_transform), batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
+
+# จัดการ Class Imbalance ด้วย WeightedRandomSampler ในชุด Train (สุ่ม 50:50)
+import numpy as np
+from torch.utils.data import WeightedRandomSampler
+
+train_labels = [s[1] for s in train_samples]
+class_counts = np.bincount(train_labels)
+print(f"⚖️ สัดส่วนข้อมูลในชุด Train ก่อนปรับ: fresh={class_counts[0]}, not_fresh={class_counts[1]}")
+
+class_weights = 1.0 / np.maximum(class_counts, 1)
+sample_weights = [class_weights[label] for label in train_labels]
+train_sampler = WeightedRandomSampler(
+    weights=sample_weights,
+    num_samples=len(sample_weights),
+    replacement=True
+)
+
+train_loader = DataLoader(
+    ShrimpDataset(train_samples, train_transform),
+    batch_size=BATCH_SIZE,
+    sampler=train_sampler,
+    num_workers=2,
+    pin_memory=True
+)
+val_loader = DataLoader(
+    ShrimpDataset(val_samples, eval_transform),
+    batch_size=BATCH_SIZE,
+    shuffle=False,
+    num_workers=2,
+    pin_memory=True
+)
+test_loader = DataLoader(
+    ShrimpDataset(test_samples, eval_transform),
+    batch_size=BATCH_SIZE,
+    shuffle=False,
+    num_workers=2,
+    pin_memory=True
+)
+print("✅ ปรับสมดุลข้อมูลสำเร็จ! train_loader จะสุ่มดึงทั้ง 2 คลาสมาเทรนในอัตราส่วน 50:50 เท่ากัน")
 """)
 
 # ----------------- CELL 6: MODEL DEFINITIONS -----------------
-add_md("""## 5. กำหนดสถาปัตยกรรมทั้ง 4 โมเดล (Custom CNN, MobileNetV3, ResNet-50, EfficientNet-B0)""")
+add_md("""## 5. กำหนดสถาปัตยกรรมทั้ง 5 โมเดล (Custom CNN, MobileNetV3, ResNet-50, EfficientNet-B0, Vision Transformer)""")
 add_code("""import torch.nn as nn
 from torchvision import models
 from torchvision.models import (
     MobileNet_V3_Large_Weights,
     ResNet50_Weights,
-    EfficientNet_B0_Weights
+    EfficientNet_B0_Weights,
+    ViT_B_16_Weights
 )
 
 class CustomCNN(nn.Module):
@@ -297,6 +340,14 @@ def build_model(model_name, num_classes=2):
             nn.Linear(in_feat, num_classes)
         )
         return model
+    elif name == 'vit_b_16':
+        model = models.vit_b_16(weights=ViT_B_16_Weights.DEFAULT)
+        in_feat = model.heads.head.in_features
+        model.heads.head = nn.Sequential(
+            nn.Dropout(p=0.2),
+            nn.Linear(in_feat, num_classes)
+        )
+        return model
     else:
         raise ValueError(f"Unknown model name: {model_name}")
 
@@ -304,7 +355,7 @@ def count_params(model):
     return sum(p.numel() for p in model.parameters())
 
 print("✅ Model Factory พร้อมใช้งาน! โมเดลที่รองรับ:")
-for m in ['custom_cnn', 'mobilenet_v3', 'resnet50', 'efficientnet_b0']:
+for m in ['custom_cnn', 'mobilenet_v3', 'resnet50', 'efficientnet_b0', 'vit_b_16']:
     mod = build_model(m)
     print(f" - {m:15s}: {count_params(mod):,} parameters")
 """)
@@ -423,14 +474,15 @@ def train_one_model(model_name, epochs=20, lr=1e-4):
     return model, history
 """)
 
-# ----------------- CELL 8: TRAIN ALL 4 MODELS -----------------
-add_md("""## 7. รันการเทรนทั้ง 4 โมเดลตามลำดับ
-*(ใช้เวลาประมาณ 15-30 นาที ขึ้นอยู่กับจำนวนภาพ)*""")
+# ----------------- CELL 8: TRAIN ALL 5 MODELS -----------------
+add_md("""## 7. รันการเทรนทั้ง 5 โมเดลตามลำดับ
+*(ใช้เวลาประมาณ 20-35 นาที บน T4 GPU ขึ้นอยู่กับ Early Stopping)*""")
 add_code("""MODELS_TO_TRAIN = [
     ('custom_cnn', 20, 1e-3),       # Custom CNN ใช้ LR 1e-3
-    ('mobilenet_v3', 20, 1e-4),     # Transfer learning ใช้ LR 1e-4
-    ('resnet50', 20, 1e-4),
-    ('efficientnet_b0', 20, 1e-4)
+    ('mobilenet_v3', 20, 1e-4),     # MobileNetV3 ใช้ LR 1e-4
+    ('resnet50', 20, 1e-4),         # ResNet-50 ใช้ LR 1e-4
+    ('efficientnet_b0', 20, 1e-4),  # EfficientNet-B0 ใช้ LR 1e-4
+    ('vit_b_16', 20, 5e-5)          # Vision Transformer (ViT-B/16) ใช้ LR 5e-5
 ]
 
 trained_models = {}
@@ -514,7 +566,7 @@ leaderboard_df = pd.DataFrame(summary_data)
 # บันทึกตารางสรุปผลเป็น CSV ลง Drive
 leaderboard_df.to_csv(os.path.join(CHECKPOINT_DIR, "shrimp_models_leaderboard.csv"), index=False)
 
-print("🏆 ตารางสรุปผลการเปรียบเทียบทั้ง 4 โมเดล (Test Set):")
+print("🏆 ตารางสรุปผลการเปรียบเทียบทุกโมเดล (Test Set):")
 display(leaderboard_df)
 """)
 
@@ -545,8 +597,11 @@ plt.tight_layout()
 plt.savefig(os.path.join(CHECKPOINT_DIR, "validation_curves.png"), dpi=300)
 plt.show()
 
-# 2. พล็อต Confusion Matrices ของทั้ง 4 โมเดล
-fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+# 2. พล็อต Confusion Matrices ของทุกโมเดล (จัดเรียงแบบไดนามิก)
+n_models = len(eval_results)
+n_cols = 3
+n_rows = (n_models + n_cols - 1) // n_cols
+fig, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4.5 * n_rows))
 axes = axes.flatten()
 
 for idx, (name, res) in enumerate(eval_results.items()):
@@ -561,6 +616,10 @@ for idx, (name, res) in enumerate(eval_results.items()):
     ax.set_title(f"Confusion Matrix: {name}", fontsize=12, fontweight='bold')
     ax.set_xlabel("Predicted Label")
     ax.set_ylabel("True Label")
+
+# ซ่อนช่องว่างที่ไม่ได้ใช้
+for ax in axes[n_models:]:
+    ax.axis('off')
 
 plt.suptitle("Confusion Matrices Comparison (Test Set)", fontsize=16, fontweight='bold', y=1.02)
 plt.tight_layout()

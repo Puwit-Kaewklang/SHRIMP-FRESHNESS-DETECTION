@@ -6,6 +6,7 @@ from torchvision.models import (
     MobileNet_V3_Large_Weights,
     ResNet50_Weights,
     EfficientNet_B0_Weights,
+    ViT_B_16_Weights,
 )
 
 SUPPORTED_MODELS: List[str] = [
@@ -13,6 +14,7 @@ SUPPORTED_MODELS: List[str] = [
     "mobilenet_v3",
     "resnet50",
     "efficientnet_b0",
+    "vit_b_16",
 ]
 
 
@@ -111,6 +113,16 @@ def build_model(
         in_features = model.classifier[1].in_features
         model.classifier[1] = nn.Sequential(
             nn.Dropout(p=0.3),
+            nn.Linear(in_features, num_classes)
+        )
+        return model
+
+    elif name == "vit_b_16":
+        weights = ViT_B_16_Weights.DEFAULT if pretrained else None
+        model = models.vit_b_16(weights=weights)
+        in_features = model.heads.head.in_features
+        model.heads.head = nn.Sequential(
+            nn.Dropout(p=0.2),
             nn.Linear(in_features, num_classes)
         )
         return model
