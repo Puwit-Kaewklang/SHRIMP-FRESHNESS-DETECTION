@@ -37,3 +37,24 @@ def test_train_model_single_epoch(tmp_path):
     assert "val_acc" in history
     assert len(history["val_loss"]) == 1
     assert os.path.exists(save_path)
+
+def test_train_model_saves_history_json(tmp_path):
+    X = torch.randn(8, 3, 224, 224)
+    y = torch.tensor([0, 1, 0, 1, 0, 1, 0, 1])
+    dataset = TensorDataset(X, y)
+    loader = DataLoader(dataset, batch_size=4)
+
+    model = build_model("custom_cnn", num_classes=2, pretrained=False)
+    save_path = str(tmp_path / "best_model.pth")
+    history_path = str(tmp_path / "history_custom_cnn.json")
+    train_model(
+        model,
+        loader,
+        loader,
+        device=torch.device("cpu"),
+        epochs=1,
+        save_path=save_path,
+        history_path=history_path
+    )
+    assert os.path.exists(history_path)
+

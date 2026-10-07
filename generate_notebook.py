@@ -406,6 +406,14 @@ def train_one_model(model_name, epochs=20, lr=1e-4):
             
     # โหลด weights ที่ดีที่สุดกลับมา
     model.load_state_dict(torch.load(save_path, map_location=device))
+    
+    # บันทึก Training History ลง Google Drive เพื่อป้องกัน Session หลุด
+    import json
+    history_save_path = os.path.join(CHECKPOINT_DIR, f"history_{model_name}.json")
+    with open(history_save_path, 'w', encoding='utf-8') as f:
+        json.dump(history, f, indent=2)
+    print(f" 📜 บันทึก Training History -> {history_save_path}")
+    
     return model, history
 """)
 

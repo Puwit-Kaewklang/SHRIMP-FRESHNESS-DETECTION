@@ -102,6 +102,7 @@ def train_model(
     weight_decay: float = 1e-4,
     patience: int = 5,
     save_path: Optional[str] = None,
+    history_path: Optional[str] = None,
     verbose: bool = True
 ) -> Dict[str, List[float]]:
     """
@@ -160,5 +161,13 @@ def train_model(
     # Restore best weights if saved
     if save_path and os.path.exists(save_path):
         model.load_state_dict(torch.load(save_path, map_location=device, weights_only=True))
+
+    # Persist training history to JSON if path provided
+    if history_path:
+        os.makedirs(os.path.dirname(os.path.abspath(history_path)), exist_ok=True)
+        with open(history_path, "w", encoding="utf-8") as f:
+            json.dump(history, f, indent=2)
+        if verbose:
+            print(f" -> Training history saved to: {history_path}")
 
     return history
