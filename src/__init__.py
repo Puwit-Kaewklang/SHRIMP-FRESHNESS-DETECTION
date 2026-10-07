@@ -1,0 +1,1 @@
+"""Shrimp Freshness Classification Package."""
