@@ -72,20 +72,26 @@ add_code("""import os
 import zipfile
 import shutil
 
-ZIP_PATH = '/content/drive/MyDrive/shrimp_raw_jpg.zip'
+DATA_PATH = '/content/drive/MyDrive/shrimp_raw_jpg.zip'
 EXTRACT_DIR = '/content/dataset'
 
-# ตรวจสอบว่ามีไฟล์ zip อยู่ใน Drive หรือไม่
-if not os.path.exists(ZIP_PATH):
-    raise FileNotFoundError(f"❌ ไม่พบไฟล์ที่ {ZIP_PATH} กรุณาตรวจสอบว่าชื่อไฟล์และโฟลเดอร์ใน Google Drive ตรงกัน")
+# ตรวจสอบว่ามีไฟล์หรือโฟลเดอร์อยู่ใน Drive หรือไม่
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(f"❌ ไม่พบไฟล์หรือโฟลเดอร์ที่ {DATA_PATH} กรุณาตรวจสอบว่าชื่อไฟล์และโฟลเดอร์ใน Google Drive ตรงกัน")
 
-print(f"📦 กำลังแตกไฟล์จาก: {ZIP_PATH}")
 if os.path.exists(EXTRACT_DIR):
     shutil.rmtree(EXTRACT_DIR)
-os.makedirs(EXTRACT_DIR, exist_ok=True)
 
-with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
-    zip_ref.extractall(EXTRACT_DIR)
+if os.path.isdir(DATA_PATH):
+    print(f"📁 ตรวจพบว่า {DATA_PATH} เป็นโฟลเดอร์ (Folder)")
+    print(f"🚀 กำลังคัดลอกไฟล์มายัง Local SSD: {EXTRACT_DIR}...")
+    shutil.copytree(DATA_PATH, EXTRACT_DIR)
+else:
+    print(f"📦 ตรวจพบว่า {DATA_PATH} เป็นไฟล์บีบอัด (.zip)")
+    print(f"🚀 กำลังแตกไฟล์มายัง Local SSD: {EXTRACT_DIR}...")
+    os.makedirs(EXTRACT_DIR, exist_ok=True)
+    with zipfile.ZipFile(DATA_PATH, 'r') as zip_ref:
+        zip_ref.extractall(EXTRACT_DIR)
 
 # ค้นหาโฟลเดอร์ที่มี fresh และ not_fresh
 dataset_root = None
@@ -102,7 +108,7 @@ if not dataset_root:
     else:
         raise ValueError(f"❌ ไม่พบโฟลเดอร์ 'fresh' และ 'not_fresh' ใน {EXTRACT_DIR}")
 
-print(f"✅ แตกไฟล์สำเร็จ! Dataset Root Path: {dataset_root}")
+print(f"✅ เตรียม Dataset สำเร็จ! Dataset Root Path: {dataset_root}")
 """)
 
 # ----------------- CELL 4: DATA VERIFICATION & DISPLAY -----------------

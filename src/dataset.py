@@ -27,17 +27,35 @@ class TransformedSubset(Dataset):
         return image, label
 
 
-def extract_and_prepare_dataset(zip_path: str, extract_to: str) -> str:
+def extract_and_prepare_dataset(source_path: str, extract_to: str) -> str:
     """
-    Extracts zip archive and identifies the root directory containing
+    Extracts zip archive or copies directory and identifies the root directory containing
     the 'fresh' and 'not_fresh' class folders.
     """
-    if not os.path.exists(zip_path):
-        raise FileNotFoundError(f"Dataset archive not found: {zip_path}")
+    if not os.path.exists(source_path):
+        raise FileNotFoundError(f"Dataset path not found: {source_path}")
 
     os.makedirs(extract_to, exist_ok=True)
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(extract_to)
+    if os.path.isdir(source_path):
+        # If source is already a directory
+        if os.path.abspath(source_path) != os.path.abspath(extract_to):
+            # If fresh and not_fresh already directly inside source_path
+            f_check = os.path.join(source_path, "fresh")
+            nf_check = os.path.join(source_path, "not_fresh")
+            if os.path.isdir(f_check) and os.path.isdir(nf_check):
+                return source_path
+            for item in os.listdir(source_path):
+                s_item = os.path.join(source_path, item)
+                d_item = os.path.join(extract_to, item)
+                if os.path.isdir(s_item):
+                    if os.path.exists(d_item):
+                        shutil.rmtree(d_item)
+                    shutil.copytree(s_item, d_item)
+                else:
+                    shutil.copy2(s_item, d_item)
+    else:
+        with zipfile.ZipFile(source_path, "r") as zf:
+            zf.extractall(extract_to)
 
     # Search for folder containing fresh and not_fresh
     for root, dirs, _ in os.walk(extract_to):
