@@ -31,9 +31,21 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-    /* Global Typography: Prompt Font */
-    html, body, [class*="css"], .stApp, h1, h2, h3, h4, h5, h6, p, div, span, button {
-        font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    /* Global Typography: Apply Prompt font smoothly without breaking Streamlit icon fonts */
+    html, body, .stApp, [data-testid="stAppViewContainer"] {
+        font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .main-header, .sub-header, .status-desc {
+        font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Protect Streamlit icon ligatures (upload, light_mode, dark_mode, contrast, etc.) */
+    [class*="material-symbols"],
+    [class*="material-icons"],
+    [data-testid="stIcon"],
+    .material-symbols-rounded,
+    .material-icons {
+        font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important;
     }
 
     /* Main Headers: Adapt dynamically to Streamlit theme using CSS variables */
