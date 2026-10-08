@@ -1624,7 +1624,7 @@ if current_image is not None:
     with col_hdr_label:
         st.markdown(
             """
-            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%; height: 38px; margin: 0; padding: 0;">
+            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%; height: 38px; margin: 0; padding: 0; transform: translateY(-8px);">
                 <span class="step-label">02 / ANALYSIS RESULT</span>
             </div>
             """,
