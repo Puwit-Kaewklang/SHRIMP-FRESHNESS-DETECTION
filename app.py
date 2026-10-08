@@ -593,8 +593,16 @@ st.markdown(
         margin-bottom: 16px;
     }
     .brand-mark {
-        font-size: 34px;
-        line-height: 1;
+        width: 44px;
+        height: 44px;
+        background: rgba(2, 132, 199, 0.12);
+        border: 1px solid rgba(2, 132, 199, 0.25);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
     }
     .sidebar-detail h1 {
         font-family: 'Outfit', 'Prompt', sans-serif;
@@ -860,7 +868,15 @@ device_label = "Apple Silicon GPU (MPS)" if device.type == "mps" else ("NVIDIA C
 st.sidebar.markdown(
     """
     <div class="brand-row">
-        <span class="brand-mark">🦐</span>
+        <div class="brand-mark">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 12h.01" stroke-width="2.5" />
+                <path d="M13 22c.5-.5 1.12-1 2.5-1-1.38 0-2-.5-2.5-1" />
+                <path d="M14 2a3.28 3.28 0 0 1-3.227 1.798l-6.17-.561A2.387 2.387 0 1 0 4.387 8H15.5a1 1 0 0 1 0 13 1 1 0 0 0 0-5H12a7 7 0 0 1-7-7V8" />
+                <path d="M14 8a8.5 8.5 0 0 1 0 8" />
+                <path d="M16 16c2 0 4.5-4 4-6" />
+            </svg>
+        </div>
         <div class="sidebar-detail">
             <h1>ShrimpGuard <span>AI</span></h1>
             <p>QUALITY ANALYSIS</p>
@@ -959,7 +975,13 @@ st.markdown(
     </div>
     <header class="page-header">
         <div class="eyebrow">
-            <span class="eyebrow-dot"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; flex-shrink: 0;">
+                <path d="M11 12h.01" stroke-width="2.5" />
+                <path d="M13 22c.5-.5 1.12-1 2.5-1-1.38 0-2-.5-2.5-1" />
+                <path d="M14 2a3.28 3.28 0 0 1-3.227 1.798l-6.17-.561A2.387 2.387 0 1 0 4.387 8H15.5a1 1 0 0 1 0 13 1 1 0 0 0 0-5H12a7 7 0 0 1-7-7V8" />
+                <path d="M14 8a8.5 8.5 0 0 1 0 8" />
+                <path d="M16 16c2 0 4.5-4 4-6" />
+            </svg>
             SHRIMP FRESHNESS DETECTION
         </div>
         <h2 class="main-title">ระบบจำแนกความสดของกุ้งด้วย AI</h2>
