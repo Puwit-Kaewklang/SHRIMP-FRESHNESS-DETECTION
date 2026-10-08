@@ -51,6 +51,49 @@ def find_model_weights(model_name: str, search_dirs: Optional[List[str]] = None)
     return None
 
 
+def download_model_weights_if_missing(
+    model_name: str,
+    repo_id: Optional[str] = None,
+    save_dir: str = "models",
+) -> Optional[str]:
+    """
+    Check if local weights exist; if not, attempt download from Hugging Face Hub.
+    Repo ID can be passed explicitly, read from HF_MODELS_REPO env var, or read from Streamlit secrets.
+    Returns the resolved local file path or None if download fails or repo is not configured.
+    """
+    local_path = find_model_weights(model_name)
+    if local_path and os.path.isfile(local_path):
+        return local_path
+
+    resolved_repo = repo_id or os.environ.get("HF_MODELS_REPO")
+    if not resolved_repo:
+        try:
+            import streamlit as st
+            resolved_repo = st.secrets.get("HF_MODELS_REPO")
+        except Exception:
+            resolved_repo = None
+
+    if not resolved_repo:
+        return None
+
+    target_filename = MODEL_FILENAMES.get(model_name, f"best_{model_name}.pth")
+    os.makedirs(save_dir, exist_ok=True)
+    try:
+        from huggingface_hub import hf_hub_download
+        downloaded_path = hf_hub_download(
+            repo_id=resolved_repo,
+            filename=target_filename,
+            local_dir=save_dir,
+        )
+        if os.path.isfile(downloaded_path):
+            return downloaded_path
+    except Exception as e:
+        print(f"[Warning] Could not download {target_filename} from {resolved_repo}: {e}")
+        return None
+
+    return None
+
+
 def get_eval_transform() -> transforms.Compose:
     """
     Standard evaluation transform: Resize to 256, CenterCrop to 224, ImageNet normalization.
@@ -75,6 +118,9 @@ def load_model(
     model = build_model(model_name, num_classes=len(CLASS_NAMES), pretrained=False)
 
     resolved_path = weights_path or find_model_weights(model_name)
+    if not resolved_path or not os.path.isfile(resolved_path):
+        resolved_path = download_model_weights_if_missing(model_name)
+
     if resolved_path and os.path.isfile(resolved_path):
         state_dict = torch.load(resolved_path, map_location=dev)
         model.load_state_dict(state_dict)
