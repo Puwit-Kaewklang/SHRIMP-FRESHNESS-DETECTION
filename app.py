@@ -252,15 +252,23 @@ st.markdown(
         margin-bottom: 16px;
     }
     .step-heading-left {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 12px;
+        height: 38px;
+        margin: 0;
+        padding: 0;
     }
-    .step-heading-left h3 {
+    .step-heading-left h3,
+    .step-heading-title {
         font-size: 20px;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--text-color);
         margin: 0;
+        padding: 0;
+        line-height: 38px;
+        display: inline-flex;
+        align-items: center;
     }
     .step-label {
         font-family: 'Outfit', sans-serif;
@@ -270,41 +278,56 @@ st.markdown(
         color: #0284c7;
         background: rgba(2, 132, 199, 0.1);
         border: 1px solid rgba(2, 132, 199, 0.25);
-        height: 38px;
-        min-height: 38px;
-        max-height: 38px;
-        padding: 0 16px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        white-space: nowrap;
+        height: 38px !important;
+        min-height: 38px !important;
+        max-height: 38px !important;
+        padding: 0 16px !important;
+        border-radius: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
     }
     .status-pill {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 20px;
+        font-size: 15px;
         font-weight: 600;
-        padding: 2px 14px;
-        border-radius: 999px;
-        background: rgba(2, 132, 199, 0.14);
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(2, 132, 199, 0.25);
+        background: rgba(2, 132, 199, 0.1);
         color: #0284c7;
-        display: inline-flex;
-        align-items: center;
-        line-height: 1.3;
+        height: 38px !important;
+        min-height: 38px !important;
+        max-height: 38px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
     }
     .status-pill-idle {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 20px;
+        font-size: 15px;
         font-weight: 600;
-        padding: 2px 14px;
-        border-radius: 999px;
-        background: rgba(125, 140, 160, 0.15);
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(125, 140, 160, 0.25);
+        background: rgba(125, 140, 160, 0.12);
         color: var(--text-color);
-        opacity: 0.75;
-        display: inline-flex;
-        align-items: center;
-        line-height: 1.3;
+        opacity: 0.85;
+        height: 38px !important;
+        min-height: 38px !important;
+        max-height: 38px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        white-space: nowrap !important;
+        margin: 0 !important;
     }
 
     /* Upload Zone Interactive */
@@ -441,13 +464,46 @@ st.markdown(
         text-overflow: ellipsis;
     }
 
-    /* Buttons height synchronization with step-label */
-    [data-testid="stButton"] button {
+    /* Header Columns alignment and empty paragraph elimination */
+    [data-testid="stColumn"] {
+        display: flex !important;
+        align-items: center !important;
+    }
+    [data-testid="stColumn"] [data-testid="stMarkdownContainer"] {
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    [data-testid="stColumn"] [data-testid="stMarkdownContainer"] > p {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: normal !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    [data-testid="stMarkdownContainer"] p:empty {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Buttons height and corner radius synchronization */
+    [data-testid="stButton"] button,
+    button[data-testid="baseButton-secondary"],
+    button[kind="secondary"] {
         min-height: 38px !important;
         height: 38px !important;
         max-height: 38px !important;
         border-radius: 8px !important;
         box-sizing: border-box !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-family: 'Outfit', 'Prompt', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
     }
 
     /* Empty / Awaiting State Card */
@@ -1404,7 +1460,7 @@ st.markdown(
     """
     <div class="step-heading-row">
         <div class="step-heading-left">
-            <h3>แหล่งภาพ</h3>
+            <span class="step-heading-title">แหล่งภาพ</span>
         </div>
         <span class="step-label">01 / IMAGE INPUT</span>
     </div>
@@ -1559,7 +1615,7 @@ if current_image is not None:
         st.markdown(
             f"""
             <div class="step-heading-left">
-                <h3>⚡ ผลการวิเคราะห์</h3>
+                <span class="step-heading-title">⚡ ผลการวิเคราะห์</span>
                 <span class="status-pill">{demo_badge_text}</span>
             </div>
             """,
@@ -1568,7 +1624,7 @@ if current_image is not None:
     with col_hdr_label:
         st.markdown(
             """
-            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%; height: 38px; margin: 0; padding: 0;">
                 <span class="step-label">02 / ANALYSIS RESULT</span>
             </div>
             """,
@@ -1715,7 +1771,7 @@ else:
         """
         <div class="step-heading-row" style="margin-top: 24px;">
             <div class="step-heading-left">
-                <h3>⚡ ผลการวิเคราะห์</h3>
+                <span class="step-heading-title">⚡ ผลการวิเคราะห์</span>
                 <span class="status-pill-idle">รอเลือกภาพหรืออัปโหลด</span>
             </div>
             <span class="step-label">02 / ANALYSIS RESULT</span>
