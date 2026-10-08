@@ -242,24 +242,24 @@ train_loader = DataLoader(
     ShrimpDataset(train_samples, train_transform),
     batch_size=BATCH_SIZE,
     sampler=train_sampler,
-    num_workers=2,
+    num_workers=0,
     pin_memory=True
 )
 val_loader = DataLoader(
     ShrimpDataset(val_samples, eval_transform),
     batch_size=BATCH_SIZE,
     shuffle=False,
-    num_workers=2,
+    num_workers=0,
     pin_memory=True
 )
 test_loader = DataLoader(
     ShrimpDataset(test_samples, eval_transform),
     batch_size=BATCH_SIZE,
     shuffle=False,
-    num_workers=2,
+    num_workers=0,
     pin_memory=True
 )
-print("✅ ปรับสมดุลข้อมูลสำเร็จ! train_loader จะสุ่มดึงทั้ง 2 คลาสมาเทรนในอัตราส่วน 50:50 เท่ากัน")
+print("✅ ปรับสมดุลข้อมูลสำเร็จ! train_loader จะสุ่มดึงทั้ง 2 คลาสมาเทรนในอัตราส่วน 50:50 เท่ากัน (num_workers=0 ป้องกัน RAM OOM)")
 """)
 
 # ----------------- CELL 6: MODEL DEFINITIONS -----------------
@@ -485,18 +485,37 @@ add_code("""MODELS_TO_TRAIN = [
     ('vit_b_16', 20, 5e-5)          # Vision Transformer (ViT-B/16) ใช้ LR 5e-5
 ]
 
+import gc
+
+FORCE_RETRAIN = False  # ตั้งเป็น True หากต้องการบังคับเทรนใหม่ทั้งหมด
+
 trained_models = {}
 histories = {}
 
 for name, eps, lr_val in MODELS_TO_TRAIN:
-    mod, hist = train_one_model(name, epochs=eps, lr=lr_val)
-    trained_models[name] = mod
-    histories[name] = hist
-    # เคลียร์ Cache GPU Memory ป้องกัน memory สะสม
+    save_path = os.path.join(CHECKPOINT_DIR, f"best_{name}.pth")
+    history_save_path = os.path.join(CHECKPOINT_DIR, f"history_{name}.json")
+    
+    # หากมีโมเดลและประวัติที่เทรนเสร็จแล้วใน Drive ให้โหลดมาใช้ทันที ไม่ต้องเสียเวลารันซ้ำ
+    if not FORCE_RETRAIN and os.path.exists(save_path) and os.path.exists(history_save_path):
+        print(f"\\n📂 ตรวจพบโมเดล '{name}' ที่เคยเทรนเสร็จแล้วใน Drive -> โหลดมาใช้งานทันที!")
+        mod = build_model(name).to(device)
+        mod.load_state_dict(torch.load(save_path, map_location=device))
+        with open(history_save_path, 'r', encoding='utf-8') as f:
+            hist = json.load(f)
+        trained_models[name] = mod
+        histories[name] = hist
+    else:
+        mod, hist = train_one_model(name, epochs=eps, lr=lr_val)
+        trained_models[name] = mod
+        histories[name] = hist
+
+    # เคลียร์ Cache RAM และ GPU VRAM
+    gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-print("\\n🎉 เทรนโมเดลครบทั้ง 4 ตัวเรียบร้อยแล้ว!")
+print("\\n🎉 ได้รับโมเดลครบทั้ง 5 สถาปัตยกรรมพร้อมสำหรับการประเมินผลเรียบร้อยแล้ว!")
 """)
 
 # ----------------- CELL 9: EVALUATION & LEADERBOARD -----------------
