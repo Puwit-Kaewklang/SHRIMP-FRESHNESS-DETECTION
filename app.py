@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any, List
 import os
+import gc
 import io
 import base64
 from pathlib import Path
@@ -1085,12 +1086,18 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-@st.cache_resource(show_spinner="กำลังโหลดโมเดล AI...")
+@st.cache_resource(max_entries=1, show_spinner="กำลังโหลดโมเดล AI...")
 def get_cached_model(model_name: str) -> Any:
+    # Evict and garbage collect previous model from memory to stay well within 1GB RAM limits on Streamlit Cloud
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
     device = get_device()
     weights_path = find_model_weights(model_name)
     model = load_model(model_name, weights_path=weights_path, device=device)
-    return model, weights_path
+    resolved_path = weights_path or find_model_weights(model_name)
+    return model, resolved_path
 
 
 def load_available_samples() -> Dict[str, List[str]]:
@@ -1220,6 +1227,11 @@ st.sidebar.markdown(
 
 weights_filename = os.path.basename(resolved_weights_path) if resolved_weights_path else "None"
 weights_size_mb = (os.path.getsize(resolved_weights_path) / (1024 * 1024)) if resolved_weights_path else 0.0
+weight_badge = (
+    f'<strong class="active-pill">ACTIVE ({weights_size_mb:.1f} MB)</strong>'
+    if resolved_weights_path
+    else '<strong class="fallback-pill" style="color: #ea580c; background: rgba(234, 88, 12, 0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px;">FALLBACK (Base Architecture)</strong>'
+)
 
 st.sidebar.markdown(
     f"""
@@ -1231,7 +1243,7 @@ st.sidebar.markdown(
             </div>
             <div>
                 <span>Model Weights</span>
-                <strong class="active-pill">ACTIVE ({weights_size_mb:.1f} MB)</strong>
+                {weight_badge}
             </div>
             <div class="system-track">
                 <div class="system-track-fill"></div>
