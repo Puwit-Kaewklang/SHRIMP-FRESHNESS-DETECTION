@@ -293,27 +293,57 @@ st.markdown(
         opacity: 0.75;
     }
 
-    /* Upload Zone */
+    /* Upload Zone Interactive */
     .upload-zone-box {
         background: var(--secondary-background-color);
-        border: 1.5px dashed rgba(2, 132, 199, 0.4);
+        border: 2px dashed rgba(2, 132, 199, 0.4);
         border-radius: 16px;
-        padding: 26px 20px;
+        padding: 30px 20px;
         text-align: center;
+        margin-top: 6px;
         margin-bottom: 12px;
-        transition: all 0.2s ease;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        user-select: none;
+    }
+    .upload-zone-box:hover {
+        border-color: #00a7f5;
+        background: rgba(2, 132, 199, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 167, 245, 0.09);
+    }
+    .upload-zone-box.drag-active {
+        border-color: #00a7f5 !important;
+        border-style: solid !important;
+        background: rgba(2, 132, 199, 0.12) !important;
+        transform: scale(1.01);
+    }
+    .upload-zone-has-file {
+        border-color: rgba(16, 185, 129, 0.5) !important;
+        background: rgba(16, 185, 129, 0.04) !important;
+    }
+    .upload-zone-has-file:hover {
+        border-color: #10B981 !important;
+        background: rgba(16, 185, 129, 0.08) !important;
     }
     .upload-icon-circle {
-        width: 56px;
-        height: 56px;
+        width: 58px;
+        height: 58px;
         background: rgba(2, 132, 199, 0.12);
         color: #0284c7;
         border-radius: 16px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
+        transition: transform 0.2s ease;
+    }
+    .upload-zone-box:hover .upload-icon-circle {
+        transform: scale(1.08);
+    }
+    .upload-icon-circle.success-circle {
+        background: rgba(16, 185, 129, 0.14);
+        color: #10B981;
     }
     .upload-zone-box h4 {
         font-size: 18px;
@@ -332,6 +362,18 @@ st.markdown(
         font-size: 13px;
         color: var(--text-color);
         opacity: 0.6;
+    }
+
+    /* Completely hide Streamlit's lower native file uploader bar */
+    [data-testid="stFileUploader"] {
+        position: absolute !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     /* Sample Cards */
@@ -1218,8 +1260,78 @@ st.html(
             }
         }
 
+        function initUploadZone() {
+            const doc = getDoc();
+            const zone = doc.getElementById('upload-zone-box');
+            if (zone && zone.dataset.bound !== 'true') {
+                zone.dataset.bound = 'true';
+
+                // Click on zone opens the native file chooser
+                zone.addEventListener('click', function(e) {
+                    if (e.target.closest('button')) return;
+                    const input = doc.querySelector('[data-testid="stFileUploaderDropzoneInput"]') ||
+                                  doc.querySelector('section[data-testid="stFileUploaderDropzone"] input') ||
+                                  doc.querySelector('[data-testid="stFileUploader"] input[type="file"]');
+                    if (input) {
+                        input.click();
+                    }
+                });
+
+                // Drag over effect
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.add('drag-active');
+                });
+
+                zone.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.remove('drag-active');
+                });
+
+                // Drop file into zone
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.remove('drag-active');
+
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        const input = doc.querySelector('[data-testid="stFileUploaderDropzoneInput"]') ||
+                                      doc.querySelector('section[data-testid="stFileUploaderDropzone"] input') ||
+                                      doc.querySelector('[data-testid="stFileUploader"] input[type="file"]');
+                        if (input) {
+                            try {
+                                const dt = new DataTransfer();
+                                for (let i = 0; i < e.dataTransfer.files.length; i++) {
+                                    dt.items.add(e.dataTransfer.files[i]);
+                                }
+                                input.files = dt.files;
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            } catch(err) {
+                                console.error('DataTransfer upload error:', err);
+                            }
+                        }
+
+                        const dropzone = doc.querySelector('[data-testid="stFileUploaderDropzone"]');
+                        if (dropzone) {
+                            dropzone.dispatchEvent(new DragEvent('drop', {
+                                dataTransfer: e.dataTransfer,
+                                bubbles: true,
+                                cancelable: true
+                            }));
+                        }
+                    }
+                });
+            }
+        }
+
         initSidebarToggle();
-        setInterval(initSidebarToggle, 250);
+        initUploadZone();
+        setInterval(function() {
+            initSidebarToggle();
+            initUploadZone();
+        }, 250);
 
         const doc = getDoc();
         if (doc && !doc._sidebarKeybound) {
@@ -1266,22 +1378,57 @@ is_uploaded = False
 file_size_mb = 0.0
 
 with tab_upload:
-    st.markdown(
-        """
-        <div class="upload-zone-box">
-            <div class="upload-icon-circle">📤</div>
-            <h4>ลากภาพกุ้งมาวางที่นี่</h4>
-            <p>หรือคลิกเลือกไฟล์ภาพจากอุปกรณ์ของคุณด้านล่าง</p>
-            <div class="file-formats-note">JPG, PNG, WEBP • สูงสุด 20 MB</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    if "uploader_key" not in st.session_state:
+        st.session_state["uploader_key"] = 0
+
     uploaded_file = st.file_uploader(
         "เลือกไฟล์ภาพกุ้ง:",
         type=["jpg", "jpeg", "png", "webp"],
         label_visibility="collapsed",
+        key=f"file_uploader_{st.session_state['uploader_key']}",
     )
+
+    if uploaded_file is None:
+        st.markdown(
+            """
+            <div class="upload-zone-box" id="upload-zone-box" title="คลิกเพื่อเลือกไฟล์ภาพจากอุปกรณ์ หรือลากภาพมาวางที่นี่">
+                <div class="upload-icon-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#00a7f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                        <path d="M12 12v9" />
+                        <path d="m16 16-4-4-4 4" />
+                    </svg>
+                </div>
+                <h4>ลากภาพกุ้งมาวางที่นี่</h4>
+                <p>หรือคลิกเลือกไฟล์ภาพจากอุปกรณ์ของคุณ</p>
+                <div class="file-formats-note">JPG, PNG, WEBP • สูงสุด 20 MB</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            f"""
+            <div class="upload-zone-box upload-zone-has-file" id="upload-zone-box" title="คลิกเพื่อเลือกภาพใหม่ หรือลากภาพมาวาง">
+                <div class="upload-icon-circle success-circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                </div>
+                <h4 style="color: #10B981;">โหลดภาพเรียบร้อย: {uploaded_file.name}</h4>
+                <p>ขนาดไฟล์: {uploaded_file.size / (1024 * 1024):.2f} MB · คลิกหรือลากภาพใหม่มาวาง เพื่อเปลี่ยนภาพ</p>
+                <div class="file-formats-note">JPG, PNG, WEBP • สูงสุด 20 MB</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        c_clear_space, c_clear_act = st.columns([5, 1])
+        with c_clear_act:
+            if st.button("🗑️ ล้างภาพ", key="btn_clear_uploaded_file", use_container_width=True):
+                st.session_state["uploader_key"] += 1
+                st.session_state["active_sample_path"] = None
+                st.rerun()
+
     if uploaded_file is not None:
         try:
             current_image = Image.open(uploaded_file).convert("RGB")
