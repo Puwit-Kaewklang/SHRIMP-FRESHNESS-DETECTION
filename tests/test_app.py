@@ -20,3 +20,13 @@ def test_app_model_selector():
     assert len(at.sidebar.selectbox) >= 1
     # Check that ResNet-50 is the default
     assert at.sidebar.selectbox[0].value == "resnet50"
+
+
+def test_app_file_uploader_rendered():
+    at = AppTest.from_file(APP_PATH)
+    at.run(timeout=15)
+    assert not at.exception
+    # Ensure file_uploader widget is active and rendered
+    assert len(at.file_uploader) >= 1
+    assert "file_uploader_" in at.file_uploader[0].key
+
