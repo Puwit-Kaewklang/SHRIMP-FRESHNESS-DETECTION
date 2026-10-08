@@ -1,9 +1,7 @@
 from typing import Optional, Dict, Any, List
 import os
-import glob
 from pathlib import Path
 from PIL import Image
-import numpy as np
 import torch
 import streamlit as st
 
@@ -11,7 +9,6 @@ from src.models import SUPPORTED_MODELS
 from src.inference import (
     load_model,
     predict_image,
-    generate_gradcam,
     find_model_weights,
     CLASS_NAMES,
 )
@@ -27,107 +24,103 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# Custom Styling
+# Custom Styling: Modern Blue Theme & High Legibility Font
 # ---------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Headers: Automatically adapt to Streamlit Theme and Dark/Light Modes */
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+    /* Global Typography: Prompt Font */
+    html, body, [class*="css"], .stApp, h1, h2, h3, h4, h5, h6, p, div, span, button {
+        font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+
+    /* Main Headers: Adapt dynamically to Streamlit theme using CSS variables */
     .main-header {
         font-size: 2.3rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.2rem;
+        letter-spacing: -0.01em;
+        line-height: 1.3;
+    }
+    .header-accent {
+        color: #0284C7; /* Ocean Sky Blue: High contrast in both Light & Dark modes */
         font-weight: 800;
-        color: var(--text-color, #F8FAFC);
-        margin-bottom: 0.25rem;
-        letter-spacing: -0.02em;
     }
     .sub-header {
         font-size: 1.05rem;
-        color: var(--text-color, #94A3B8);
-        opacity: 0.85;
+        color: var(--text-color);
+        opacity: 0.75;
         margin-bottom: 1.5rem;
     }
 
-    /* Fallback and explicit dark theme rules */
-    @media (prefers-color-scheme: dark) {
-        .main-header {
-            color: #F8FAFC !important;
-        }
-        .sub-header {
-            color: #94A3B8 !important;
-        }
-    }
-    [data-theme="dark"] .main-header,
-    .stApp[data-theme="dark"] .main-header {
-        color: #F8FAFC !important;
-    }
-    [data-theme="dark"] .sub-header,
-    .stApp[data-theme="dark"] .sub-header {
-        color: #94A3B8 !important;
+    /* Blue Theme Containers */
+    .blue-card {
+        background: rgba(2, 132, 199, 0.06);
+        border: 1px solid rgba(2, 132, 199, 0.22);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
     }
 
-    /* Status Cards: Glassmorphism tints that look stunning in both dark and light modes */
+    /* Status Cards */
     .status-card-fresh {
         background: rgba(16, 185, 129, 0.12);
         border: 2px solid #10B981;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.15);
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.12);
     }
     .status-card-not-fresh {
         background: rgba(239, 68, 68, 0.12);
         border: 2px solid #EF4444;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.15);
+        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.12);
     }
     .status-title-fresh {
-        font-size: 2.2rem;
+        font-size: 2.1rem;
         font-weight: 800;
         color: #10B981;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
     }
     .status-title-not-fresh {
-        font-size: 2.2rem;
+        font-size: 2.1rem;
         font-weight: 800;
         color: #EF4444;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.4rem;
     }
-    .status-desc-fresh {
-        color: var(--text-color, #E2E8F0);
+    .status-desc {
+        color: var(--text-color);
         font-size: 1.05rem;
         margin: 0;
-        opacity: 0.95;
+        opacity: 0.88;
+        line-height: 1.5;
     }
-    .status-desc-not-fresh {
-        color: var(--text-color, #E2E8F0);
-        font-size: 1.05rem;
-        margin: 0;
-        opacity: 0.95;
-    }
-    .metric-badge {
+
+    /* Blue Accent Badges */
+    .metric-badge-blue {
         display: inline-block;
         padding: 0.35rem 0.75rem;
         border-radius: 9999px;
         font-size: 0.875rem;
         font-weight: 600;
+        background-color: rgba(2, 132, 199, 0.15);
+        color: #0284C7;
+        border: 1px solid rgba(2, 132, 199, 0.35);
         margin-right: 0.5rem;
     }
-    .metric-badge-green {
-        background-color: rgba(16, 185, 129, 0.2);
-        color: #10B981;
-        border: 1px solid rgba(16, 185, 129, 0.4);
-    }
-    .metric-badge-blue {
-        background-color: rgba(59, 130, 246, 0.2);
-        color: #60A5FA;
-        border: 1px solid rgba(59, 130, 246, 0.4);
-    }
-    .metric-badge-gray {
-        background-color: rgba(148, 163, 184, 0.15);
-        color: var(--text-color, #94A3B8);
-        border: 1px solid rgba(148, 163, 184, 0.3);
+
+    /* Image Container */
+    .image-preview-box {
+        border: 1px solid rgba(2, 132, 199, 0.25);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.02);
     }
     </style>
     """,
@@ -201,12 +194,12 @@ def load_available_samples() -> Dict[str, List[str]]:
 
 
 # ---------------------------------------------------------
-# Sidebar Configuration
+# Sidebar Configuration: Clean Ocean Blue
 # ---------------------------------------------------------
 device = get_device()
 device_label = "Apple Silicon GPU (MPS)" if device.type == "mps" else ("NVIDIA CUDA GPU" if device.type == "cuda" else "CPU")
 
-st.sidebar.title("🦐 ตั้งค่าโมเดล AI")
+st.sidebar.markdown("### 🦐 ตั้งค่าโมเดล AI")
 
 model_options = list(MODEL_DETAILS.keys())
 selected_model_key = st.sidebar.selectbox(
@@ -218,7 +211,7 @@ selected_model_key = st.sidebar.selectbox(
 
 model_info = MODEL_DETAILS[selected_model_key]
 st.sidebar.caption(f"ℹ️ **รายละเอียด:** {model_info['description']}")
-st.sidebar.caption(f"📊 **ขนาดโครงข่าย:** {model_info['params']}")
+st.sidebar.caption(f"📊 **ขนาดโมเดล:** {model_info['params']}")
 
 # Load Model
 model, resolved_weights_path = get_cached_model(selected_model_key)
@@ -229,40 +222,30 @@ st.sidebar.markdown(f"**⚡ ฮาร์ดแวร์:** `{device_label}`")
 
 if resolved_weights_path:
     file_size_mb = os.path.getsize(resolved_weights_path) / (1024 * 1024)
-    st.sidebar.success(f"✅ โหลด Weights สำเร็จ: `{os.path.basename(resolved_weights_path)}` ({file_size_mb:.1f} MB)")
+    st.sidebar.success(f"✅ โหลด Weights: `{os.path.basename(resolved_weights_path)}` ({file_size_mb:.1f} MB)")
 else:
     st.sidebar.warning("⚠️ ไม่พบไฟล์ .pth (รันในโหมดโครงสร้างเริ่มต้น)")
-
-st.sidebar.divider()
-st.sidebar.markdown("### 🔍 Explainable AI (Grad-CAM)")
-enable_gradcam = st.sidebar.checkbox(
-    "เปิดแสดง Heatmap การตัดสินใจ (Grad-CAM)",
-    value=True,
-    help="วิเคราะห์จุดบนตัวกุ้งที่ AI ให้ความสำคัญในการจำแนกความสด",
-)
-gradcam_alpha = st.sidebar.slider(
-    "ความโปร่งใสของ Heatmap (Overlay Alpha):",
-    min_value=0.1,
-    max_value=0.9,
-    value=0.5,
-    step=0.05,
-    disabled=not enable_gradcam,
-)
 
 
 # ---------------------------------------------------------
 # Main Page Header
 # ---------------------------------------------------------
-st.markdown('<div class="main-header">🦐 ระบบจำแนกความสดของกุ้งด้วย AI</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="sub-header">การตรวจสอบคุณภาพกุ้งสดแบบเรียลไทม์ด้วย Deep Learning (CNNs & Vision Transformer)</div>',
+    """
+    <div class="main-header">
+        🦐 ระบบจำแนกความสดของกุ้งด้วย AI
+    </div>
+    <div class="sub-header">
+        ระบบตรวจสอบคุณภาพและจำแนกความสดของกุ้งแบบอัตโนมัติด้วย Deep Learning (CNNs & Vision Transformer)
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------
 # Image Input Section
 # ---------------------------------------------------------
-tab_upload, tab_sample = st.tabs(["📤 อัปโหลดภาพของคุณ", "🖼️ เลือกจากภาพตัวอย่าง (Sample Images)"])
+tab_upload, tab_sample = st.tabs(["📤 อัปโหลดภาพของคุณ", "🖼️ เลือกจากภาพตัวอย่างในระบบ"])
 
 current_image: Optional[Image.Image] = None
 image_source_label = ""
@@ -301,7 +284,7 @@ with tab_sample:
                 image_source_label = f"ภาพตัวอย่างกุ้งไม่สด: {filename}"
 
 # ---------------------------------------------------------
-# Inference & Results Section
+# Inference & Results Section (Clean & Focused, No Heatmap)
 # ---------------------------------------------------------
 if current_image is not None:
     st.divider()
@@ -320,36 +303,17 @@ if current_image is not None:
     col_view, col_metrics = st.columns([1, 1], gap="large")
 
     with col_view:
-        st.markdown("**🖼️ ภาพต้นฉบับ:**")
+        st.markdown("**🖼️ ภาพที่ทำการวิเคราะห์:**")
         st.image(current_image, use_container_width=True)
 
-        if enable_gradcam:
-            if selected_model_key == "vit_b_16":
-                st.info("💡 **หมายเหตุ Grad-CAM:** สถาปัตยกรรม Vision Transformer (ViT) ใช้กลไก Self-Attention จึงไม่รองรับ Feature map แบบ 2D Conv ทั่วไป (แนะนำเลือก ResNet-50 หรือ MobileNetV3 เพื่อดู Grad-CAM)")
-            else:
-                gradcam_img = generate_gradcam(
-                    model,
-                    selected_model_key,
-                    current_image,
-                    device=device,
-                    alpha=gradcam_alpha,
-                )
-                if gradcam_img is not None:
-                    st.markdown("**🔥 Heatmap พื้นที่ที่โมเดลสนใจ (Grad-CAM):**")
-                    st.image(
-                        gradcam_img,
-                        caption="สีแดง-เหลือง = บริเวณที่มีอิทธิพลสูงต่อการตัดสินใจของ AI",
-                        use_container_width=True,
-                    )
-
     with col_metrics:
-        # Result Card
+        # Status Result Card
         if is_fresh:
             st.markdown(
                 """
                 <div class="status-card-fresh">
                     <div class="status-title-fresh">🟢 กุ้งสด (FRESH)</div>
-                    <p class="status-desc-fresh">
+                    <p class="status-desc">
                         ระดับความสดอยู่ในเกณฑ์มาตรฐาน เหมาะสำหรับการบริโภคหรือแปรรูป
                     </p>
                 </div>
@@ -361,7 +325,7 @@ if current_image is not None:
                 """
                 <div class="status-card-not-fresh">
                     <div class="status-title-not-fresh">🔴 กุ้งไม่สด (NOT FRESH)</div>
-                    <p class="status-desc-not-fresh">
+                    <p class="status-desc">
                         ตรวจพบสัญญาณการเสื่อมสภาพ ไม่แนะนำสำหรับการบริโภคสด
                     </p>
                 </div>
@@ -372,7 +336,7 @@ if current_image is not None:
         st.write("")
         st.markdown("##### 📊 ความน่าจะเป็นของแต่ละคลาส (Class Probabilities)")
         
-        # Progress bars
+        # Progress bars with blue and status indicators
         st.write(f"**กุ้งสด (Fresh):** `{prob_fresh:.1f}%`")
         st.progress(min(prob_fresh / 100.0, 1.0))
 

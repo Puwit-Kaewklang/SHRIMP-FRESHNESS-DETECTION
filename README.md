@@ -21,13 +21,14 @@ An end-to-end Deep Learning system for automated shrimp freshness classification
   * **EfficientNet-B0:** Compound scaling balancing accuracy and computational budget (~5.3M params).
   * **Vision Transformer (ViT-B/16):** Pure self-attention Transformer architecture (~86M params).
 * **🖥️ Interactive Streamlit Web App (`app.py`):**
+  * Modern **Ocean Blue UI** designed for maximum clarity and aesthetic appeal.
+  * Enhanced **Prompt typography** providing optimal Thai and English legibility.
+  * Full **Dynamic Theme Synchronization**: automatically switches text and card colors seamlessly between Light and Dark modes.
   * Real-time image upload (Drag & drop JPEG, PNG, WEBP).
   * Quick-select sample images for instant verification.
   * Model architecture selector with live latency benchmarking (ms).
-  * Dark & Light mode dynamic theme support.
-* **🔍 Explainable AI (Grad-CAM):**
-  * Heatmap overlay displaying critical regions (shell, head, tail) influencing AI decisions.
-  * Interactive transparency slider ($\alpha$-blend control).
+* **🔍 Explainable AI Engine (`src/inference.py`):**
+  * Built-in Grad-CAM visualizer support for CNN feature maps.
 * **⚖️ Balanced Training Pipeline:**
   * Uses `WeightedRandomSampler` to enforce equal 50:50 sampling during training without artificial oversampling.
 * **🧪 Robust Engineering & Testing:**
