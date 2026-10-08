@@ -402,15 +402,28 @@ st.markdown(
         opacity: 0.6;
     }
 
-    /* Transparent Overlay for Streamlit Native File Uploader */
-    div[data-testid="stTabContent"] div[data-testid="stElementContainer"]:has([data-testid="stFileUploader"]) {
+    /* Seamless Overlay for Streamlit Native File Uploader (Eliminating Any Blank Gap) */
+    div[data-baseweb="tab-panel"],
+    div[role="tabpanel"],
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"],
+    div[data-testid="stTabs"] [role="tabpanel"] {
         position: relative !important;
-        margin-bottom: -216px !important;
-        z-index: 10 !important;
+    }
+
+    div[role="tabpanel"] div[data-testid="stElementContainer"]:has([data-testid="stFileUploader"]),
+    div[data-baseweb="tab-panel"] div[data-testid="stElementContainer"]:has([data-testid="stFileUploader"]) {
+        position: absolute !important;
+        top: 6px !important;
+        left: 0 !important;
+        width: 100% !important;
         height: 204px !important;
+        z-index: 10 !important;
         overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     [data-testid="stFileUploader"] {
+        width: 100% !important;
         height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -418,6 +431,7 @@ st.markdown(
     }
     [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {
         opacity: 0 !important;
+        width: 100% !important;
         height: 204px !important;
         min-height: 204px !important;
         cursor: pointer !important;
@@ -427,22 +441,24 @@ st.markdown(
         background: transparent !important;
     }
     /* When hovering over the transparent native uploader, trigger the box hover effects underneath */
-    div[data-testid="stTabContent"]:has([data-testid="stFileUploaderDropzone"]:hover) .upload-zone-box {
+    div[role="tabpanel"]:has([data-testid="stFileUploaderDropzone"]:hover) .upload-zone-box,
+    div[data-baseweb="tab-panel"]:has([data-testid="stFileUploaderDropzone"]:hover) .upload-zone-box {
         border-color: #00a7f5 !important;
         background: rgba(2, 132, 199, 0.05) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(0, 167, 245, 0.09) !important;
     }
-    div[data-testid="stTabContent"]:has([data-testid="stFileUploaderDropzone"]:hover) .upload-icon-circle {
+    div[role="tabpanel"]:has([data-testid="stFileUploaderDropzone"]:hover) .upload-icon-circle,
+    div[data-baseweb="tab-panel"]:has([data-testid="stFileUploaderDropzone"]:hover) .upload-icon-circle {
         transform: scale(1.08) !important;
     }
     /* Hide native file preview card when file is loaded so custom green card & buttons take priority */
     [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileData"]) {
         display: none !important;
     }
-    div[data-testid="stTabContent"]:has([data-testid="stFileUploaderFileData"]) div[data-testid="stElementContainer"]:has([data-testid="stFileUploader"]) {
-        height: 0 !important;
-        margin-bottom: 0 !important;
+    div[role="tabpanel"] div[data-testid="stElementContainer"]:has([data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileData"])),
+    div[data-baseweb="tab-panel"] div[data-testid="stElementContainer"]:has([data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileData"])) {
+        display: none !important;
     }
 
     /* Sample Cards */
