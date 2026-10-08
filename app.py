@@ -264,33 +264,47 @@ st.markdown(
     }
     .step-label {
         font-family: 'Outfit', sans-serif;
-        font-size: 11px;
+        font-size: 11.5px;
         font-weight: 700;
         letter-spacing: 1.2px;
         color: #0284c7;
         background: rgba(2, 132, 199, 0.1);
         border: 1px solid rgba(2, 132, 199, 0.25);
-        padding: 5px 12px;
-        border-radius: 6px;
+        height: 38px;
+        min-height: 38px;
+        max-height: 38px;
+        padding: 0 16px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        white-space: nowrap;
     }
     .status-pill {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 13px;
+        font-size: 20px;
         font-weight: 600;
-        padding: 4px 11px;
+        padding: 2px 14px;
         border-radius: 999px;
         background: rgba(2, 132, 199, 0.14);
         color: #0284c7;
+        display: inline-flex;
+        align-items: center;
+        line-height: 1.3;
     }
     .status-pill-idle {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 13px;
+        font-size: 20px;
         font-weight: 600;
-        padding: 4px 11px;
+        padding: 2px 14px;
         border-radius: 999px;
         background: rgba(125, 140, 160, 0.15);
         color: var(--text-color);
         opacity: 0.75;
+        display: inline-flex;
+        align-items: center;
+        line-height: 1.3;
     }
 
     /* Upload Zone Interactive */
@@ -425,6 +439,15 @@ st.markdown(
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    /* Buttons height synchronization with step-label */
+    [data-testid="stButton"] button {
+        min-height: 38px !important;
+        height: 38px !important;
+        max-height: 38px !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
     }
 
     /* Empty / Awaiting State Card */
@@ -1527,27 +1550,35 @@ if current_image is None and st.session_state.get("active_sample_path"):
 # Step 2: Analysis Result Section
 # ---------------------------------------------------------
 if current_image is not None:
-    demo_badge_text = "วิเคราะห์เรียลไทม์" if is_uploaded else "ตัวอย่างชุดข้อมูล"
+    demo_badge_text = "วิเคราะห์เรียลไทม์" if is_uploaded else "ตัวอย่างข้อมูล"
 
-    # Header with Clear/Reset Option
-    col_hdr_left, col_hdr_right = st.columns([4, 1])
+    # Header with Clear/Reset Option: Title & Badge on Left | Step Label & Clear Button on Right (Vertically Centered & Equal Height)
+    st.markdown('<div style="margin-top: 26px;"></div>', unsafe_allow_html=True)
+    col_hdr_left, col_hdr_label, col_hdr_btn = st.columns([5.2, 2.3, 2.5], vertical_alignment="center")
     with col_hdr_left:
         st.markdown(
             f"""
-            <div class="step-heading-row" style="margin-top: 24px; border-bottom: none; margin-bottom: 0;">
-                <div class="step-heading-left">
-                    <h3>⚡ ผลการวิเคราะห์</h3>
-                    <span class="status-pill">{demo_badge_text}</span>
-                </div>
+            <div class="step-heading-left">
+                <h3>⚡ ผลการวิเคราะห์</h3>
+                <span class="status-pill">{demo_badge_text}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_hdr_label:
+        st.markdown(
+            """
+            <div style="display: flex; justify-content: flex-end; align-items: center; width: 100%;">
                 <span class="step-label">02 / ANALYSIS RESULT</span>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    with col_hdr_right:
-        st.write("")
+    with col_hdr_btn:
         if st.button("✕ ล้างผลการวิเคราะห์", key="btn_reset_image", use_container_width=True):
             st.session_state["active_sample_path"] = None
+            if "uploader_key" in st.session_state:
+                st.session_state["uploader_key"] += 1
             st.rerun()
 
     # Run PyTorch Model Prediction
