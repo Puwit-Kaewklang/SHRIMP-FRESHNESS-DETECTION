@@ -33,9 +33,10 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-    /* Global Typography Base */
+    /* Global Typography Base - Scaled up for comfort and legibility */
     html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
         font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 16px;
     }
     h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
         font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -56,16 +57,16 @@ st.markdown(
         justify-content: space-between;
         align-items: center;
         margin-bottom: 12px;
-        padding-bottom: 8px;
+        padding-bottom: 6px;
     }
     .workspace-crumb {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-size: 11px;
+        font-size: 13px;
         font-family: 'Outfit', sans-serif;
         color: var(--text-color);
-        opacity: 0.65;
+        opacity: 0.7;
         letter-spacing: 0.5px;
     }
     .crumb-separator {
@@ -76,43 +77,43 @@ st.markdown(
         align-items: center;
         gap: 6px;
         font-family: 'Outfit', sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 1px;
         color: #0284c7;
         background: rgba(2, 132, 199, 0.1);
         border: 1px solid rgba(2, 132, 199, 0.25);
-        padding: 4px 10px;
+        padding: 5px 12px;
         border-radius: 999px;
     }
 
     /* Page Header */
     .page-header {
-        margin-bottom: 24px;
+        margin-bottom: 26px;
     }
     .eyebrow {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         font-family: 'Outfit', sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
-        letter-spacing: 1.6px;
+        letter-spacing: 1.8px;
         color: #0284c7;
         margin-bottom: 8px;
         text-transform: uppercase;
     }
     .eyebrow-dot {
-        width: 6px;
-        height: 6px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
         background-color: #0284c7;
     }
     .main-title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 700;
         color: var(--text-color);
-        margin: 0 0 6px 0;
+        margin: 0 0 8px 0;
         line-height: 1.3;
         letter-spacing: -0.01em;
     }
@@ -121,9 +122,9 @@ st.markdown(
         font-weight: 800;
     }
     .main-subtitle {
-        font-size: 14px;
+        font-size: 16px;
         color: var(--text-color);
-        opacity: 0.75;
+        opacity: 0.8;
         margin: 0;
         line-height: 1.5;
     }
@@ -134,40 +135,50 @@ st.markdown(
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid rgba(125, 140, 160, 0.2);
-        padding-bottom: 8px;
-        margin-top: 14px;
-        margin-bottom: 14px;
+        padding-bottom: 10px;
+        margin-top: 18px;
+        margin-bottom: 16px;
     }
     .step-heading-left {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
     .step-heading-left h3 {
-        font-size: 17px;
+        font-size: 20px;
         font-weight: 600;
         color: var(--text-color);
         margin: 0;
     }
     .step-label {
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 1.2px;
         color: #0284c7;
         background: rgba(2, 132, 199, 0.1);
         border: 1px solid rgba(2, 132, 199, 0.25);
-        padding: 4px 10px;
+        padding: 5px 12px;
         border-radius: 6px;
     }
     .status-pill {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 600;
-        padding: 3px 9px;
+        padding: 4px 11px;
         border-radius: 999px;
-        background: rgba(2, 132, 199, 0.12);
+        background: rgba(2, 132, 199, 0.14);
         color: #0284c7;
+    }
+    .status-pill-idle {
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 4px 11px;
+        border-radius: 999px;
+        background: rgba(125, 140, 160, 0.15);
+        color: var(--text-color);
+        opacity: 0.75;
     }
 
     /* Upload Zone */
@@ -175,75 +186,96 @@ st.markdown(
         background: var(--secondary-background-color);
         border: 1.5px dashed rgba(2, 132, 199, 0.4);
         border-radius: 16px;
-        padding: 24px 20px;
+        padding: 26px 20px;
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         transition: all 0.2s ease;
     }
     .upload-icon-circle {
-        width: 52px;
-        height: 52px;
+        width: 56px;
+        height: 56px;
         background: rgba(2, 132, 199, 0.12);
         color: #0284c7;
-        border-radius: 14px;
+        border-radius: 16px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
-        margin-bottom: 8px;
+        font-size: 28px;
+        margin-bottom: 10px;
     }
     .upload-zone-box h4 {
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 600;
         color: var(--text-color);
-        margin: 4px 0;
+        margin: 4px 0 6px 0;
     }
     .upload-zone-box p {
-        font-size: 12px;
+        font-size: 14.5px;
         color: var(--text-color);
-        opacity: 0.7;
-        margin: 0 0 8px 0;
+        opacity: 0.75;
+        margin: 0 0 10px 0;
     }
     .file-formats-note {
         font-family: 'Outfit', sans-serif;
-        font-size: 11px;
+        font-size: 13px;
         color: var(--text-color);
-        opacity: 0.55;
+        opacity: 0.6;
     }
 
     /* Sample Cards */
-    .sample-card {
-        background: var(--secondary-background-color);
-        border: 1px solid rgba(125, 140, 160, 0.2);
-        border-radius: 14px;
-        padding: 12px;
-        text-align: center;
-        margin-bottom: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-    }
     .sample-tag-fresh {
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.6px;
         color: #10B981;
-        background: rgba(16, 185, 129, 0.12);
-        padding: 2px 7px;
-        border-radius: 4px;
+        background: rgba(16, 185, 129, 0.14);
+        padding: 3px 9px;
+        border-radius: 5px;
         display: inline-block;
         margin-bottom: 6px;
     }
     .sample-tag-not-fresh {
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.6px;
         color: #EF4444;
-        background: rgba(239, 68, 68, 0.12);
-        padding: 2px 7px;
-        border-radius: 4px;
+        background: rgba(239, 68, 68, 0.14);
+        padding: 3px 9px;
+        border-radius: 5px;
         display: inline-block;
         margin-bottom: 6px;
+    }
+
+    /* Empty / Awaiting State Card */
+    .awaiting-card {
+        background: var(--secondary-background-color);
+        border: 1.5px dashed rgba(2, 132, 199, 0.35);
+        border-radius: 16px;
+        padding: 42px 28px;
+        text-align: center;
+        margin-top: 14px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+    }
+    .awaiting-icon {
+        font-size: 40px;
+        margin-bottom: 14px;
+        display: inline-block;
+    }
+    .awaiting-card h4 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-color);
+        margin: 0 0 10px 0;
+    }
+    .awaiting-card p {
+        font-size: 15px;
+        color: var(--text-color);
+        opacity: 0.8;
+        max-width: 580px;
+        margin: 0 auto;
+        line-height: 1.6;
     }
 
     /* Preview Panel */
@@ -251,26 +283,26 @@ st.markdown(
         background: var(--secondary-background-color);
         border: 1px solid rgba(125, 140, 160, 0.22);
         border-radius: 16px;
-        padding: 18px;
+        padding: 20px;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
     }
     .preview-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-        font-size: 13px;
+        margin-bottom: 14px;
+        font-size: 15px;
         font-weight: 600;
         color: var(--text-color);
     }
     .preview-filename {
         font-family: 'Outfit', monospace;
-        font-size: 11px;
-        background: rgba(125, 140, 160, 0.15);
+        font-size: 13px;
+        background: rgba(125, 140, 160, 0.16);
         color: var(--text-color);
-        padding: 3px 8px;
+        padding: 4px 10px;
         border-radius: 6px;
-        max-width: 220px;
+        max-width: 240px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -284,78 +316,80 @@ st.markdown(
     }
     .preview-badge {
         position: absolute;
-        bottom: 12px;
-        left: 12px;
-        background: rgba(15, 23, 42, 0.85);
+        bottom: 14px;
+        left: 14px;
+        background: rgba(15, 23, 42, 0.88);
         backdrop-filter: blur(4px);
         color: #38bdf8;
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.8px;
-        padding: 4px 9px;
+        padding: 5px 11px;
         border-radius: 6px;
-        border: 1px solid rgba(56, 189, 248, 0.3);
+        border: 1px solid rgba(56, 189, 248, 0.35);
     }
     .preview-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 12px;
+        margin-top: 14px;
         font-family: 'Outfit', sans-serif;
-        font-size: 11px;
+        font-size: 13px;
         color: var(--text-color);
-        opacity: 0.65;
+        opacity: 0.7;
     }
 
     /* Classification Result Cards */
     .fresh-result-card {
         background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.35);
+        border: 1px solid rgba(16, 185, 129, 0.38);
         border-radius: 16px;
         display: flex;
         align-items: center;
-        gap: 18px;
-        padding: 20px 22px;
+        gap: 20px;
+        padding: 22px 24px;
     }
     .not-fresh-result-card {
         background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.35);
+        border: 1px solid rgba(239, 68, 68, 0.38);
         border-radius: 16px;
         display: flex;
         align-items: center;
-        gap: 18px;
-        padding: 20px 22px;
+        gap: 20px;
+        padding: 22px 24px;
     }
     .result-icon-fresh {
         background: #10B981;
-        width: 52px;
-        height: 52px;
+        width: 56px;
+        height: 56px;
         color: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
+        font-size: 28px;
+        font-weight: 700;
         flex-shrink: 0;
-        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
     }
     .result-icon-not-fresh {
         background: #EF4444;
-        width: 52px;
-        height: 52px;
+        width: 56px;
+        height: 56px;
         color: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
+        font-size: 28px;
+        font-weight: 700;
         flex-shrink: 0;
-        box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
     }
     .result-overline-fresh {
         font-family: 'Outfit', sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 1.2px;
         color: #10B981;
@@ -363,32 +397,32 @@ st.markdown(
     }
     .result-overline-not-fresh {
         font-family: 'Outfit', sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 1.2px;
         color: #EF4444;
         text-transform: uppercase;
     }
     .result-title-fresh {
-        font-size: 26px;
+        font-size: 30px;
         font-weight: 700;
         color: #10B981;
-        margin: 3px 0 5px 0;
+        margin: 4px 0 6px 0;
         line-height: 1.2;
     }
     .result-title-not-fresh {
-        font-size: 26px;
+        font-size: 30px;
         font-weight: 700;
         color: #EF4444;
-        margin: 3px 0 5px 0;
+        margin: 4px 0 6px 0;
         line-height: 1.2;
     }
     .result-desc {
         color: var(--text-color);
-        font-size: 13px;
-        opacity: 0.85;
+        font-size: 15px;
+        opacity: 0.9;
         margin: 0;
-        line-height: 1.4;
+        line-height: 1.5;
     }
 
     /* Probability Panel */
@@ -396,59 +430,59 @@ st.markdown(
         background: var(--secondary-background-color);
         border: 1px solid rgba(125, 140, 160, 0.22);
         border-radius: 16px;
-        padding: 20px 22px;
-        margin-top: 14px;
+        padding: 22px 24px;
+        margin-top: 16px;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
     }
     .prob-title-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
     }
     .prob-title-row h4 {
-        font-size: 15px;
+        font-size: 17px;
         font-weight: 600;
         color: var(--text-color);
         margin: 0;
     }
     .prob-sub-badge {
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         letter-spacing: 0.8px;
         color: #0284c7;
         background: rgba(2, 132, 199, 0.12);
-        padding: 3px 8px;
+        padding: 4px 9px;
         border-radius: 6px;
         font-weight: 700;
     }
     .prob-item {
-        margin-bottom: 14px;
+        margin-bottom: 16px;
     }
     .prob-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 6px;
-        font-size: 13px;
+        margin-bottom: 8px;
+        font-size: 15px;
     }
     .prob-label {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
         font-weight: 500;
         color: var(--text-color);
     }
     .prob-dot-fresh {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         background-color: #10B981;
         display: inline-block;
     }
     .prob-dot-not-fresh {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         background-color: #EF4444;
         display: inline-block;
@@ -457,17 +491,17 @@ st.markdown(
         font-family: 'Outfit', sans-serif;
         font-weight: 700;
         color: #10B981;
-        font-size: 15px;
+        font-size: 18px;
     }
     .prob-val-not-fresh {
         font-family: 'Outfit', sans-serif;
         font-weight: 700;
         color: #EF4444;
-        font-size: 15px;
+        font-size: 18px;
     }
     .custom-progress-bg {
         width: 100%;
-        height: 8px;
+        height: 9px;
         background: rgba(125, 140, 160, 0.18);
         border-radius: 999px;
         overflow: hidden;
@@ -487,30 +521,30 @@ st.markdown(
     .result-metrics-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 14px;
-        padding-top: 16px;
+        gap: 14px;
+        margin-top: 16px;
+        padding-top: 18px;
         border-top: 1px solid rgba(125, 140, 160, 0.18);
     }
     .metric-box {
         background: rgba(2, 132, 199, 0.05);
-        border: 1px solid rgba(2, 132, 199, 0.15);
+        border: 1px solid rgba(2, 132, 199, 0.16);
         border-radius: 12px;
-        padding: 10px 12px;
+        padding: 12px 14px;
     }
     .metric-box-label {
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.6px;
         color: var(--text-color);
-        opacity: 0.6;
+        opacity: 0.65;
         margin-bottom: 4px;
         text-transform: uppercase;
     }
     .metric-box-value {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 700;
         color: var(--text-color);
     }
@@ -520,17 +554,17 @@ st.markdown(
         background: rgba(2, 132, 199, 0.06);
         border: 1px solid rgba(2, 132, 199, 0.2);
         border-radius: 12px;
-        padding: 12px 16px;
-        margin-top: 16px;
+        padding: 14px 18px;
+        margin-top: 18px;
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: flex-start;
     }
     .analysis-notice-card p {
-        font-size: 12px;
-        line-height: 1.5;
+        font-size: 14px;
+        line-height: 1.6;
         color: var(--text-color);
-        opacity: 0.85;
+        opacity: 0.9;
         margin: 0;
     }
 
@@ -538,15 +572,15 @@ st.markdown(
     .main-footer {
         border-top: 1px solid rgba(125, 140, 160, 0.2);
         color: var(--text-color);
-        opacity: 0.6;
+        opacity: 0.65;
         font-family: 'Outfit', sans-serif;
         letter-spacing: 0.6px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 36px;
-        padding: 20px 0;
-        font-size: 11px;
+        margin-top: 40px;
+        padding: 22px 0;
+        font-size: 12.5px;
     }
 
     /* Sidebar Custom Elements */
@@ -559,12 +593,12 @@ st.markdown(
         margin-bottom: 16px;
     }
     .brand-mark {
-        font-size: 32px;
+        font-size: 34px;
         line-height: 1;
     }
     .sidebar-detail h1 {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 700;
         color: var(--text-color);
         margin: 0;
@@ -575,52 +609,54 @@ st.markdown(
     }
     .sidebar-detail p {
         font-family: 'Outfit', sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         letter-spacing: 1.2px;
         color: var(--text-color);
-        opacity: 0.6;
+        opacity: 0.65;
         margin: 2px 0 0 0;
         text-transform: uppercase;
         font-weight: 600;
     }
     .sidebar-section-title {
         font-family: 'Prompt', sans-serif !important;
-        font-size: 1.2rem;
+        font-size: 1.22rem;
         font-weight: 700;
         color: var(--text-color);
-        margin-top: 14px;
-        margin-bottom: 10px;
+        margin-top: 16px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 8px;
         border-bottom: 2px solid rgba(2, 132, 199, 0.3);
         padding-bottom: 6px;
+        word-break: keep-all;
+        line-height: 1.35;
     }
     .model-family-text {
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 12px;
+        font-size: 14px;
         color: #0284c7;
         font-weight: 600;
         margin-top: 6px;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .model-specs-grid {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 8px;
         border-top: 1px solid rgba(125, 140, 160, 0.15);
-        padding-top: 10px;
+        padding-top: 12px;
         margin-top: 8px;
     }
     .spec-item {
         display: flex;
         justify-content: space-between;
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 11px;
+        font-size: 13px;
     }
     .spec-item span {
         color: var(--text-color);
-        opacity: 0.65;
+        opacity: 0.7;
     }
     .spec-item strong {
         color: var(--text-color);
@@ -628,28 +664,28 @@ st.markdown(
     }
     .sidebar-note {
         background: rgba(2, 132, 199, 0.05);
-        border: 1px solid rgba(2, 132, 199, 0.15);
+        border: 1px solid rgba(2, 132, 199, 0.16);
         border-radius: 8px;
-        padding: 8px 10px;
-        margin-top: 12px;
-        font-size: 11px;
+        padding: 10px 12px;
+        margin-top: 14px;
+        font-size: 13px;
         color: var(--text-color);
-        opacity: 0.75;
-        line-height: 1.4;
+        opacity: 0.8;
+        line-height: 1.5;
     }
     .system-status-box {
         background: rgba(2, 132, 199, 0.06);
         border: 1px solid rgba(2, 132, 199, 0.2);
         border-radius: 12px;
-        padding: 12px 14px;
-        margin-top: 10px;
+        padding: 14px 16px;
+        margin-top: 12px;
     }
     .system-specs {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
         font-family: 'Outfit', 'Prompt', sans-serif;
-        font-size: 11px;
+        font-size: 13px;
     }
     .system-specs div {
         display: flex;
@@ -658,7 +694,7 @@ st.markdown(
     }
     .system-specs span {
         color: var(--text-color);
-        opacity: 0.65;
+        opacity: 0.7;
     }
     .system-specs strong {
         color: var(--text-color);
@@ -668,11 +704,11 @@ st.markdown(
         color: #10B981;
         font-weight: 700;
         font-family: 'Outfit', sans-serif;
-        font-size: 10px;
+        font-size: 12px;
     }
     .system-track {
         width: 100%;
-        height: 4px;
+        height: 5px;
         background: rgba(125, 140, 160, 0.2);
         border-radius: 999px;
         overflow: hidden;
@@ -688,19 +724,19 @@ st.markdown(
         align-items: center;
         gap: 8px;
         font-family: 'Outfit', sans-serif;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.8px;
         color: #10B981;
         margin-top: 16px;
-        padding: 6px 10px;
+        padding: 7px 12px;
         background: rgba(16, 185, 129, 0.1);
         border-radius: 8px;
         border: 1px solid rgba(16, 185, 129, 0.25);
     }
     .status-dot {
-        width: 6px;
-        height: 6px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
         background: #10B981;
         box-shadow: 0 0 6px #10B981;
@@ -927,7 +963,7 @@ st.markdown(
             SHRIMP FRESHNESS DETECTION
         </div>
         <h2 class="main-title">ระบบจำแนกความสดของกุ้งด้วย AI</h2>
-        <p class="main-subtitle">ตรวจสอบคุณภาพความสดของกุ้งด้วยเทคโนโลยี Deep Learning</p>
+        <p class="main-subtitle">ตรวจสอบคุณภาพความสดของกุ้งด้วยเทคโนโลยี Deep Learning (CNNs & Vision Transformer)</p>
     </header>
     """,
     unsafe_allow_html=True,
@@ -948,17 +984,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Image state handling: Default to first sample image on start
-available_samples = load_available_samples()
-default_sample_path = available_samples["fresh"][0] if available_samples["fresh"] else None
-
+# Initialize active sample to None so NO PREDICTION runs on startup
 if "active_sample_path" not in st.session_state:
-    st.session_state["active_sample_path"] = default_sample_path
+    st.session_state["active_sample_path"] = None
+
+available_samples = load_available_samples()
 
 tab_upload, tab_sample = st.tabs(["📤 อัปโหลดภาพของคุณ", "🖼️ ภาพตัวอย่าง"])
 
 current_image: Optional[Image.Image] = None
-current_filename = "SHRIMP_SAMPLE.JPG"
+current_filename = ""
 is_uploaded = False
 file_size_mb = 0.0
 
@@ -968,7 +1003,7 @@ with tab_upload:
         <div class="upload-zone-box">
             <div class="upload-icon-circle">📤</div>
             <h4>ลากภาพกุ้งมาวางที่นี่</h4>
-            <p>หรือเลือกไฟล์ภาพจากอุปกรณ์ของคุณด้านล่าง</p>
+            <p>หรือคลิกเลือกไฟล์ภาพจากอุปกรณ์ของคุณด้านล่าง</p>
             <div class="file-formats-note">JPG, PNG, WEBP • สูงสุด 20 MB</div>
         </div>
         """,
@@ -985,11 +1020,12 @@ with tab_upload:
             current_filename = uploaded_file.name
             file_size_mb = uploaded_file.size / (1024 * 1024)
             is_uploaded = True
+            st.session_state["active_sample_path"] = None  # Clear sample if user uploads file
         except Exception as e:
             st.error(f"ไม่สามารถเปิดไฟล์ภาพได้: {e}")
 
 with tab_sample:
-    st.caption("เลือกภาพกุ้งจากชุดข้อมูลจริงเพื่อทดสอบการจำแนกทันที:")
+    st.caption("เลือกภาพกุ้งจากชุดข้อมูลจริงเพื่อส่งเข้าโมเดลวิเคราะห์ความสดทันที:")
     col_s1, col_s2 = st.columns(2)
     
     with col_s1:
@@ -1004,9 +1040,9 @@ with tab_sample:
                 except Exception:
                     pass
             with c2:
-                st.markdown(f'<span class="sample-tag-fresh">FRESH SAMPLE</span>', unsafe_allow_html=True)
-                st.write(f"`{fn}`")
-                if st.button("เลือกภาพนี้", key=f"btn_{s_path}", use_container_width=True):
+                st.markdown('<span class="sample-tag-fresh">FRESH SAMPLE</span>', unsafe_allow_html=True)
+                st.write(f"**`{fn}`**")
+                if st.button("เลือกภาพนี้เพื่อวิเคราะห์", key=f"btn_{s_path}", use_container_width=True):
                     st.session_state["active_sample_path"] = s_path
                     st.rerun()
 
@@ -1022,41 +1058,50 @@ with tab_sample:
                 except Exception:
                     pass
             with c2:
-                st.markdown(f'<span class="sample-tag-not-fresh">NOT FRESH SAMPLE</span>', unsafe_allow_html=True)
-                st.write(f"`{fn}`")
-                if st.button("เลือกภาพนี้", key=f"btn_{s_path}", use_container_width=True):
+                st.markdown('<span class="sample-tag-not-fresh">NOT FRESH SAMPLE</span>', unsafe_allow_html=True)
+                st.write(f"**`{fn}`**")
+                if st.button("เลือกภาพนี้เพื่อวิเคราะห์", key=f"btn_{s_path}", use_container_width=True):
                     st.session_state["active_sample_path"] = s_path
                     st.rerun()
 
-# Fallback to chosen sample if no user upload
-if current_image is None and st.session_state["active_sample_path"] and os.path.exists(st.session_state["active_sample_path"]):
+# If user clicked a sample in tab 2 and has not uploaded a separate file
+if current_image is None and st.session_state.get("active_sample_path"):
     sample_p = st.session_state["active_sample_path"]
-    current_image = Image.open(sample_p).convert("RGB")
-    current_filename = os.path.basename(sample_p)
-    file_size_mb = os.path.getsize(sample_p) / (1024 * 1024)
-    is_uploaded = False
+    if os.path.exists(sample_p):
+        current_image = Image.open(sample_p).convert("RGB")
+        current_filename = os.path.basename(sample_p)
+        file_size_mb = os.path.getsize(sample_p) / (1024 * 1024)
+        is_uploaded = False
 
 # ---------------------------------------------------------
 # Step 2: Analysis Result Section
 # ---------------------------------------------------------
-demo_badge_text = "วิเคราะห์เรียลไทม์" if is_uploaded else "ผลตัวอย่าง"
-
-st.markdown(
-    f"""
-    <div class="step-heading-row" style="margin-top: 24px;">
-        <div class="step-heading-left">
-            <h3>⚡ ผลการวิเคราะห์</h3>
-            <span class="status-pill">{demo_badge_text}</span>
-        </div>
-        <span class="step-label">02 / ANALYSIS RESULT</span>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
 if current_image is not None:
+    demo_badge_text = "วิเคราะห์เรียลไทม์" if is_uploaded else "ตัวอย่างชุดข้อมูล"
+
+    # Header with Clear/Reset Option
+    col_hdr_left, col_hdr_right = st.columns([4, 1])
+    with col_hdr_left:
+        st.markdown(
+            f"""
+            <div class="step-heading-row" style="margin-top: 24px; border-bottom: none; margin-bottom: 0;">
+                <div class="step-heading-left">
+                    <h3>⚡ ผลการวิเคราะห์</h3>
+                    <span class="status-pill">{demo_badge_text}</span>
+                </div>
+                <span class="step-label">02 / ANALYSIS RESULT</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with col_hdr_right:
+        st.write("")
+        if st.button("✕ ล้างผลการวิเคราะห์", key="btn_reset_image", use_container_width=True):
+            st.session_state["active_sample_path"] = None
+            st.rerun()
+
     # Run PyTorch Model Prediction
-    with st.spinner("โมเดลกำลังประมวลผล..."):
+    with st.spinner("โมเดล AI กำลังประมวลผลภาพ..."):
         result = predict_image(model, current_image, device=device)
 
     is_fresh = result["class_name"] == "fresh"
@@ -1154,7 +1199,7 @@ if current_image is not None:
                 <div class="result-metrics-grid">
                     <div class="metric-box">
                         <div class="metric-box-label">CONFIDENCE LEVEL</div>
-                        <div class="metric-box-value">{confidence_tier}</div>
+                        <div class="metric-box-value">{confidence_tier} ({confidence:.1f}%)</div>
                     </div>
                     <div class="metric-box">
                         <div class="metric-box-label">SELECTED MODEL</div>
@@ -1174,7 +1219,7 @@ if current_image is not None:
     st.markdown(
         """
         <div class="analysis-notice-card">
-            <span style="font-size: 16px; line-height: 1;">💡</span>
+            <span style="font-size: 18px; line-height: 1;">💡</span>
             <p>
                 <strong>ข้อสังเกต:</strong> ผลการวิเคราะห์ประเมินด้วยแบบจำลอง Deep Learning สำหรับการคัดกรองเบื้องต้น ควรใช้ร่วมกับการประเมินทางกายภาพ (กลิ่น สี สัมผัสความแน่นของเนื้อ) และการควบคุมอุณหภูมิ เพื่อความปลอดภัยสูงสุดในการบริโภค
             </p>
@@ -1184,7 +1229,26 @@ if current_image is not None:
     )
 
 else:
-    st.info("กรุณาอัปโหลดภาพกุ้ง หรือเลือกภาพตัวอย่างจากแท็บด้านบนเพื่อเริ่มการวิเคราะห์")
+    # Awaiting state on startup (No prediction at start)
+    st.markdown(
+        """
+        <div class="step-heading-row" style="margin-top: 24px;">
+            <div class="step-heading-left">
+                <h3>⚡ ผลการวิเคราะห์</h3>
+                <span class="status-pill-idle">รอเลือกภาพหรืออัปโหลด</span>
+            </div>
+            <span class="step-label">02 / ANALYSIS RESULT</span>
+        </div>
+        <div class="awaiting-card">
+            <div class="awaiting-icon">🔍</div>
+            <h4>ระบบพร้อมสำหรับการวิเคราะห์ความสดของกุ้ง</h4>
+            <p>
+                กรุณาอัปโหลดภาพกุ้งของคุณในแท็บ <b>"📤 อัปโหลดภาพของคุณ"</b> หรือคลิกเลือกตัวอย่างในแท็บ <b>"🖼️ ภาพตัวอย่าง"</b> ด้านบนเพื่อเริ่มการวิเคราะห์ความสดด้วย AI
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # ---------------------------------------------------------
 # Footer
