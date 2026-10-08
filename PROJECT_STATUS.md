@@ -60,14 +60,21 @@
 
 เมื่อย้ายโฟลเดอร์โปรเจกต์ไปยังตำแหน่งใหม่แล้ว จะเริ่มพัฒนา Web Application ทันทีตามขั้นตอนดังนี้:
 
-### 1. โครงสร้างไฟล์ที่จะสร้างเพิ่ม:
+### 1. โครงสร้างไฟล์ในโปรเจกต์:
 ```
-shrimp-freshness-cnn/
+Shrimp_Classification/
 ├── app.py                      # 🌟 ไฟล์หลักของ Streamlit Web Application
-├── models/                     # โฟลเดอร์สำหรับวางไฟล์ .pth ที่ดาวน์โหลดมาจาก Drive
+├── models/                     # 🧠 โฟลเดอร์สำหรับวางไฟล์ .pth ที่ดาวน์โหลดมาจาก Drive
 │   ├── best_resnet50.pth       # (หรือโมเดลตัวอื่นๆ ที่ต้องการทดสอบ)
-│   └── ...
-└── sample_images/              # ภาพตัวอย่างกุ้งสด/ไม่สด สำหรับให้ผู้ใช้คลิกทดสอบทันที
+│   └── README.md
+├── sample_images/              # 🦐 ภาพตัวอย่างกุ้งสด/ไม่สด สำหรับให้ผู้ใช้คลิกทดสอบทันที
+│   ├── fresh/
+│   ├── not_fresh/
+│   └── README.md
+├── notebooks/                  # 📓 Colab Notebook สำหรับการเทรนบนคลาวด์
+│   ├── shrimp_freshness_classification.ipynb
+│   └── generate_notebook.py
+└── ...
 ```
 
 ### 2. ฟีเจอร์หลักของหน้าเว็บ (`app.py`):

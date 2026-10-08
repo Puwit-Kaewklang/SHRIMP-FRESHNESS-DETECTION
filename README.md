@@ -21,23 +21,27 @@
 ## 📁 โครงสร้างไฟล์ในโปรเจกต์ (Repository Structure)
 
 ```
-shrimp-freshness-cnn/
-├── shrimp_freshness_classification.ipynb   # 🌟 Colab Notebook ตัวเต็มสำหรับรันบน Google Colab
-├── requirements.txt                        # รายการ Dependencies สำหรับรันใน Local
-├── README.md                               # คู่มือการใช้งานฉบับสมบูรณ์
-├── src/                                    # โมดูล Python สำหรับพัฒนาและทดสอบ
-│   ├── dataset.py                          # Data Pipeline, Unzip, Stratified Split & Transforms
-│   ├── models.py                           # สถาปัตยกรรมโมเดลและ Model Factory
-│   ├── trainer.py                          # Training Loop, Early Stopping & Checkpointing
-│   └── metrics.py                          # Metrics (Acc, F1, Latency) & Visualization Helpers
-├── tests/                                  # Unit Tests (TDD)
-│   ├── test_dataset.py
-│   ├── test_models.py
-│   ├── test_trainer.py
-│   └── test_metrics.py
-└── docs/
-    ├── specs/                              # เอกสาร Design Specification
-    └── superpowers/plans/                  # เอกสาร Implementation Plan
+Shrimp_Classification/
+├── app.py                      # 🌟 หน้าเว็บแอปพลิเคชัน Streamlit (Phase 2)
+├── models/                     # 🧠 โฟลเดอร์สำหรับวางไฟล์ .pth ทั้ง 5 โมเดล
+│   └── README.md
+├── sample_images/              # 🦐 ภาพตัวอย่างสำหรับทดสอบระบบบนเว็บ
+│   ├── fresh/
+│   ├── not_fresh/
+│   └── README.md
+├── notebooks/                  # 📓 Colab Notebook และสคริปต์ที่เกี่ยวข้อง
+│   ├── shrimp_freshness_classification.ipynb
+│   └── generate_notebook.py
+├── src/                        # 🛠️ โมดูลระบบ Deep Learning
+│   ├── dataset.py              # Data Pipeline, WeightedRandomSampler & Transforms
+│   ├── models.py               # สถาปัตยกรรม 5 โมเดล (CNNs & ViT)
+│   ├── trainer.py              # Training Engine, Early Stopping & Checkpointing
+│   └── metrics.py              # Metrics (Acc, F1, Latency) & Visualization Helpers
+├── tests/                      # 🧪 Unit Tests (TDD - 12/12 ผ่านทั้งหมด)
+├── docs/                       # 📚 เอกสาร Specification และบันทึกแผนงาน
+├── requirements.txt            # รายการ Dependencies
+├── README.md                   # คู่มือการใช้งานฉบับสมบูรณ์
+└── PROJECT_STATUS.md           # บันทึกสถานะโปรเจกต์และ Roadmap
 ```
 
 ---
