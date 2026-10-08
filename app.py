@@ -117,8 +117,8 @@ st.markdown(
         line-height: 1.3;
         letter-spacing: -0.01em;
     }
-    .main-title span {
-        color: #0284c7;
+    .main-title span, .ai-highlight {
+        color: #00a7f5 !important;
         font-weight: 800;
     }
     .main-subtitle {
@@ -602,7 +602,7 @@ st.markdown(
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
+        box-shadow: 0 2px 6px rgba(0, 167, 245, 0.14);
     }
     .sidebar-detail h1 {
         font-family: 'Outfit', 'Prompt', sans-serif;
@@ -613,15 +613,15 @@ st.markdown(
         line-height: 1.2;
     }
     .sidebar-detail h1 span {
-        color: #0284c7;
+        color: #00a7f5 !important;
+        font-weight: 800;
     }
     .sidebar-detail p {
         font-family: 'Outfit', sans-serif;
         font-size: 11px;
-        letter-spacing: 1.2px;
-        color: var(--text-color);
-        opacity: 0.65;
-        margin: 2px 0 0 0;
+        letter-spacing: 1.6px;
+        color: #64748b;
+        margin: 3px 0 0 0;
         text-transform: uppercase;
         font-weight: 600;
     }
@@ -869,7 +869,7 @@ st.sidebar.markdown(
     """
     <div class="brand-row">
         <div class="brand-mark">
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00a7f5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 12h.01" stroke-width="2.5" />
                 <path d="M13 22c.5-.5 1.12-1 2.5-1-1.38 0-2-.5-2.5-1" />
                 <path d="M14 2a3.28 3.28 0 0 1-3.227 1.798l-6.17-.561A2.387 2.387 0 1 0 4.387 8H15.5a1 1 0 0 1 0 13 1 1 0 0 0 0-5H12a7 7 0 0 1-7-7V8" />
@@ -878,7 +878,7 @@ st.sidebar.markdown(
             </svg>
         </div>
         <div class="sidebar-detail">
-            <h1>ShrimpGuard <span>AI</span></h1>
+            <h1>ShrimpGuard <span class="ai-highlight">AI</span></h1>
             <p>QUALITY ANALYSIS</p>
         </div>
     </div>
@@ -1009,7 +1009,8 @@ st.markdown(
             </svg>
             SHRIMP FRESHNESS DETECTION
         </div>
-        <h2 class="main-title">ระบบจำแนกความสดของกุ้งด้วย AI</h2>
+        <!-- ระบบจำแนกความสดของกุ้งด้วย AI -->
+        <h2 class="main-title">ระบบจำแนกความสดของกุ้งด้วย <span class="ai-highlight">AI</span></h2>
         <p class="main-subtitle">ตรวจสอบคุณภาพความสดของกุ้งด้วยเทคโนโลยี Deep Learning (CNNs & Vision Transformer)</p>
     </header>
     """,
