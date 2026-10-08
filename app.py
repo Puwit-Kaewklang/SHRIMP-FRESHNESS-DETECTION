@@ -3,7 +3,7 @@ import os
 import io
 import base64
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageOps
 import torch
 import streamlit as st
 
@@ -400,6 +400,31 @@ st.markdown(
         border-radius: 5px;
         display: inline-block;
         margin-bottom: 6px;
+    }
+
+    /* Uniform Sample Image Cards in tab_sample */
+    [data-testid="stTabs"] [data-testid="stImage"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    [data-testid="stTabs"] [data-testid="stImage"] img {
+        aspect-ratio: 1 / 1 !important;
+        object-fit: cover !important;
+        width: 100% !important;
+        max-height: 140px !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(125, 140, 160, 0.2) !important;
+    }
+    .sample-filename-text {
+        font-family: 'Outfit', monospace;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 4px 0 8px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* Empty / Awaiting State Card */
@@ -1441,43 +1466,53 @@ with tab_upload:
 
 with tab_sample:
     st.caption("เลือกภาพกุ้งจากชุดข้อมูลจริงเพื่อส่งเข้าโมเดลวิเคราะห์ความสดทันที:")
-    col_s1, col_s2 = st.columns(2)
-    
-    with col_s1:
+    col_h1, col_h2 = st.columns(2, gap="medium")
+    with col_h1:
         st.markdown("**🟢 ตัวอย่างกุ้งสด (Fresh Samples):**")
-        for s_path in available_samples["fresh"]:
-            fn = os.path.basename(s_path)
-            c1, c2 = st.columns([1, 2])
-            with c1:
-                try:
-                    thumb = Image.open(s_path)
-                    st.image(thumb, use_container_width=True)
-                except Exception:
-                    pass
-            with c2:
-                st.markdown('<span class="sample-tag-fresh">FRESH SAMPLE</span>', unsafe_allow_html=True)
-                st.write(f"**`{fn}`**")
-                if st.button("เลือกภาพนี้เพื่อวิเคราะห์", key=f"btn_{s_path}", use_container_width=True):
-                    st.session_state["active_sample_path"] = s_path
-                    st.rerun()
-
-    with col_s2:
+    with col_h2:
         st.markdown("**🔴 ตัวอย่างกุ้งไม่สด (Not Fresh Samples):**")
-        for s_path in available_samples["not_fresh"]:
-            fn = os.path.basename(s_path)
-            c1, c2 = st.columns([1, 2])
-            with c1:
-                try:
-                    thumb = Image.open(s_path)
-                    st.image(thumb, use_container_width=True)
-                except Exception:
-                    pass
-            with c2:
-                st.markdown('<span class="sample-tag-not-fresh">NOT FRESH SAMPLE</span>', unsafe_allow_html=True)
-                st.write(f"**`{fn}`**")
-                if st.button("เลือกภาพนี้เพื่อวิเคราะห์", key=f"btn_{s_path}", use_container_width=True):
-                    st.session_state["active_sample_path"] = s_path
-                    st.rerun()
+
+    fresh_list = available_samples.get("fresh", [])
+    not_fresh_list = available_samples.get("not_fresh", [])
+    max_rows = max(len(fresh_list), len(not_fresh_list))
+
+    for r_idx in range(max_rows):
+        row_c1, row_c2 = st.columns(2, gap="medium")
+        with row_c1:
+            if r_idx < len(fresh_list):
+                s_path = fresh_list[r_idx]
+                fn = os.path.basename(s_path)
+                item_c1, item_c2 = st.columns([1, 2], vertical_alignment="center")
+                with item_c1:
+                    try:
+                        thumb = ImageOps.fit(Image.open(s_path).convert("RGB"), (260, 260), method=Image.Resampling.LANCZOS)
+                        st.image(thumb, use_container_width=True)
+                    except Exception:
+                        pass
+                with item_c2:
+                    st.markdown('<span class="sample-tag-fresh">FRESH SAMPLE</span>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="sample-filename-text"><code>{fn}</code></div>', unsafe_allow_html=True)
+                    if st.button("เลือกภาพนี้เพื่อวิเคราะห์", key=f"btn_{s_path}", use_container_width=True):
+                        st.session_state["active_sample_path"] = s_path
+                        st.rerun()
+
+        with row_c2:
+            if r_idx < len(not_fresh_list):
+                s_path = not_fresh_list[r_idx]
+                fn = os.path.basename(s_path)
+                item_c1, item_c2 = st.columns([1, 2], vertical_alignment="center")
+                with item_c1:
+                    try:
+                        thumb = ImageOps.fit(Image.open(s_path).convert("RGB"), (260, 260), method=Image.Resampling.LANCZOS)
+                        st.image(thumb, use_container_width=True)
+                    except Exception:
+                        pass
+                with item_c2:
+                    st.markdown('<span class="sample-tag-not-fresh">NOT FRESH SAMPLE</span>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="sample-filename-text"><code>{fn}</code></div>', unsafe_allow_html=True)
+                    if st.button("เลือกภาพนี้เพื่อวิเคราะห์", key=f"btn_{s_path}", use_container_width=True):
+                        st.session_state["active_sample_path"] = s_path
+                        st.rerun()
 
 # If user clicked a sample in tab 2 and has not uploaded a separate file
 if current_image is None and st.session_state.get("active_sample_path"):
