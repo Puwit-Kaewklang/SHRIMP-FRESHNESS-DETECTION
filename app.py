@@ -127,12 +127,18 @@ st.markdown(
         margin-right: 0.5rem;
     }
 
-    /* Image Container */
-    .image-preview-box {
-        border: 1px solid rgba(2, 132, 199, 0.25);
-        border-radius: 12px;
-        overflow: hidden;
-        background: rgba(0, 0, 0, 0.02);
+    /* Sidebar Section Headings: Prominent & Clean */
+    .sidebar-section-title {
+        font-family: 'Prompt', sans-serif !important;
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-top: 0.3rem;
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.01em;
+        line-height: 1.35;
+        border-bottom: 2px solid rgba(2, 132, 199, 0.3);
+        padding-bottom: 0.45rem;
     }
     </style>
     """,
@@ -211,7 +217,7 @@ def load_available_samples() -> Dict[str, List[str]]:
 device = get_device()
 device_label = "Apple Silicon GPU (MPS)" if device.type == "mps" else ("NVIDIA CUDA GPU" if device.type == "cuda" else "CPU")
 
-st.sidebar.markdown("### 🦐 ตั้งค่าโมเดล AI")
+st.sidebar.markdown('<div class="sidebar-section-title">🦐 ตั้งค่าโมเดล AI</div>', unsafe_allow_html=True)
 
 model_options = list(MODEL_DETAILS.keys())
 selected_model_key = st.sidebar.selectbox(
@@ -229,7 +235,7 @@ st.sidebar.caption(f"📊 **ขนาดโมเดล:** {model_info['params']
 model, resolved_weights_path = get_cached_model(selected_model_key)
 
 st.sidebar.divider()
-st.sidebar.markdown("### ⚙️ ข้อมูลระบบและการประมวลผล")
+st.sidebar.markdown('<div class="sidebar-section-title">⚙️ ข้อมูลระบบและการประมวลผล</div>', unsafe_allow_html=True)
 st.sidebar.markdown(f"**⚡ ฮาร์ดแวร์:** `{device_label}`")
 
 if resolved_weights_path:
