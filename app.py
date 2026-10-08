@@ -32,44 +32,79 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    /* Headers: Automatically adapt to Streamlit Theme and Dark/Light Modes */
     .main-header {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: #1E293B;
-        margin-bottom: 0.2rem;
+        font-size: 2.3rem;
+        font-weight: 800;
+        color: var(--text-color, #F8FAFC);
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.02em;
     }
     .sub-header {
         font-size: 1.05rem;
-        color: #64748B;
+        color: var(--text-color, #94A3B8);
+        opacity: 0.85;
         margin-bottom: 1.5rem;
     }
+
+    /* Fallback and explicit dark theme rules */
+    @media (prefers-color-scheme: dark) {
+        .main-header {
+            color: #F8FAFC !important;
+        }
+        .sub-header {
+            color: #94A3B8 !important;
+        }
+    }
+    [data-theme="dark"] .main-header,
+    .stApp[data-theme="dark"] .main-header {
+        color: #F8FAFC !important;
+    }
+    [data-theme="dark"] .sub-header,
+    .stApp[data-theme="dark"] .sub-header {
+        color: #94A3B8 !important;
+    }
+
+    /* Status Cards: Glassmorphism tints that look stunning in both dark and light modes */
     .status-card-fresh {
-        background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        background: rgba(16, 185, 129, 0.12);
         border: 2px solid #10B981;
         border-radius: 12px;
         padding: 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.15);
     }
     .status-card-not-fresh {
-        background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+        background: rgba(239, 68, 68, 0.12);
         border: 2px solid #EF4444;
         border-radius: 12px;
         padding: 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.15);
     }
     .status-title-fresh {
         font-size: 2.2rem;
         font-weight: 800;
-        color: #065F46;
+        color: #10B981;
         margin-bottom: 0.5rem;
     }
     .status-title-not-fresh {
         font-size: 2.2rem;
         font-weight: 800;
-        color: #991B1B;
+        color: #EF4444;
         margin-bottom: 0.5rem;
+    }
+    .status-desc-fresh {
+        color: var(--text-color, #E2E8F0);
+        font-size: 1.05rem;
+        margin: 0;
+        opacity: 0.95;
+    }
+    .status-desc-not-fresh {
+        color: var(--text-color, #E2E8F0);
+        font-size: 1.05rem;
+        margin: 0;
+        opacity: 0.95;
     }
     .metric-badge {
         display: inline-block;
@@ -80,16 +115,19 @@ st.markdown(
         margin-right: 0.5rem;
     }
     .metric-badge-green {
-        background-color: #D1FAE5;
-        color: #065F46;
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.4);
     }
     .metric-badge-blue {
-        background-color: #DBEAFE;
-        color: #1E40AF;
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #60A5FA;
+        border: 1px solid rgba(59, 130, 246, 0.4);
     }
     .metric-badge-gray {
-        background-color: #F1F5F9;
-        color: #475569;
+        background-color: rgba(148, 163, 184, 0.15);
+        color: var(--text-color, #94A3B8);
+        border: 1px solid rgba(148, 163, 184, 0.3);
     }
     </style>
     """,
@@ -308,10 +346,10 @@ if current_image is not None:
         # Result Card
         if is_fresh:
             st.markdown(
-                f"""
+                """
                 <div class="status-card-fresh">
                     <div class="status-title-fresh">🟢 กุ้งสด (FRESH)</div>
-                    <p style="color: #047857; font-size: 1.1rem; margin: 0;">
+                    <p class="status-desc-fresh">
                         ระดับความสดอยู่ในเกณฑ์มาตรฐาน เหมาะสำหรับการบริโภคหรือแปรรูป
                     </p>
                 </div>
@@ -320,10 +358,10 @@ if current_image is not None:
             )
         else:
             st.markdown(
-                f"""
+                """
                 <div class="status-card-not-fresh">
                     <div class="status-title-not-fresh">🔴 กุ้งไม่สด (NOT FRESH)</div>
-                    <p style="color: #B91C1C; font-size: 1.1rem; margin: 0;">
+                    <p class="status-desc-not-fresh">
                         ตรวจพบสัญญาณการเสื่อมสภาพ ไม่แนะนำสำหรับการบริโภคสด
                     </p>
                 </div>
