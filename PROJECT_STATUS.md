@@ -88,11 +88,19 @@ streamlit run app.py
 ---
 
 ## 🔄 คำแนะนำเมื่อเปิดโปรเจกต์หลังย้ายโฟลเดอร์
-1. เปิดโฟลเดอร์ `shrimp-freshness-cnn` ใน IDE (Antigravity / VS Code)
-2. สร้าง Virtual Environment ใหม่ในโฟลเดอร์ใหม่ (หากจำเป็น):
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-3. แจ้ง AI ว่า: *"ย้ายโฟลเดอร์เรียบร้อยแล้ว เริ่มทำ Phase 2 (Streamlit Web App) ได้เลย"* เพื่อดำเนินการต่อทันที!
+
+### 1. เปิดโฟลเดอร์ใน IDE:
+เปิดโฟลเดอร์ `shrimp-freshness-cnn` ใน Antigravity หรือ VS Code
+
+### 2. ⚠️ วิธีแก้ปัญหาและรีเซ็ต Virtual Environment (`.venv`):
+> **สาเหตุ:** ใน Python บน macOS เมื่อมีการย้ายโฟลเดอร์โปรเจกต์ โฟลเดอร์ `.venv` ตัวเดิมจะยังคงจำ Path เก่าที่อยู่ใน `~/.gemini/...` ทำให้เกิดปัญหา Path เพี้ยนหรือ `bad interpreter`  
+> **วิธีแก้:** ให้ลบ `.venv` เก่าทิ้ง แล้วสร้างใหม่ในโฟลเดอร์ใหม่ด้วยคำสั่งบรรทัดเดียวนี้ใน Terminal:
+
+```bash
+# รันคำสั่งนี้ครั้งเดียวในโฟลเดอร์ใหม่ (Terminal)
+rm -rf .venv && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+```
+
+### 3. เริ่มงาน Phase 2:
+เมื่อเสร็จแล้ว แจ้ง AI ได้ทันทีว่า:  
+💬 *"ย้ายโฟลเดอร์เรียบร้อยแล้ว เริ่มทำ Phase 2 (Streamlit Web App) ได้เลย"* เพื่อพัฒนาหน้าเว็บแอปต่อทันที!
