@@ -51,32 +51,62 @@ st.markdown(
         font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important;
     }
 
-    /* Compact Header & Top Container - Push Content to Top */
+    /* ------------------------------------------------------------- */
+    /* Remove Streamlit header to prevent overlap and unclickable UI */
+    /* ------------------------------------------------------------- */
     header[data-testid="stHeader"],
-    [data-testid="stHeader"] {
-        background: transparent !important;
-        height: 2.25rem !important;
-        min-height: 2.25rem !important;
-        z-index: 50 !important;
+    [data-testid="stHeader"],
+    .stAppHeader,
+    [data-testid="stToolbar"] {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        pointer-events: none !important;
     }
 
-    /* Reduce Streamlit's huge default top padding (normally 6rem) */
+    /* Push Main Content up cleanly without header interference */
     .main .block-container,
     .block-container,
     [data-testid="stMainBlockContainer"],
     [data-testid="block-container"] {
-        padding-top: 1.25rem !important;
+        padding-top: 1.5rem !important;
         padding-bottom: 2.5rem !important;
         padding-left: 2.5rem !important;
         padding-right: 2.5rem !important;
     }
 
-    /* Reduce sidebar top padding so brand aligns near top */
-    [data-testid="stSidebar"] .block-container,
-    [data-testid="stSidebarUserContent"],
+    /* Sidebar: Hide empty stSidebarHeader (takes 70px) and push logo to top */
+    [data-testid="stSidebarHeader"] {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stSidebarContent"],
     [data-testid="stSidebarContent"],
-    section[data-testid="stSidebar"] > div:first-child {
-        padding-top: 1.25rem !important;
+    section[data-testid="stSidebar"] .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+    }
+
+    [data-testid="stSidebarUserContent"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Hide Streamlit auto-generated header anchor link icons (🔗) */
+    .main-title a,
+    [data-testid="stHeaderActionElements"],
+    a.header-anchor {
+        display: none !important;
+        visibility: hidden !important;
     }
 
     /* Eliminate phantom height from style markdown containers */
@@ -634,8 +664,10 @@ st.markdown(
         display: flex;
         align-items: center;
         gap: 12px;
+        padding-top: 0 !important;
         padding-bottom: 16px;
         border-bottom: 1px solid rgba(125, 140, 160, 0.2);
+        margin-top: 0 !important;
         margin-bottom: 16px;
     }
     .brand-mark {
