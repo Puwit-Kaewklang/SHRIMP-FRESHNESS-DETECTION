@@ -112,12 +112,12 @@ st.markdown(
     .main-title {
         font-size: 32px;
         font-weight: 700;
-        color: var(--text-color);
+        color: #1d283d !important;
         margin: 0 0 8px 0;
         line-height: 1.3;
         letter-spacing: -0.01em;
     }
-    .main-title span, .ai-highlight {
+    .main-title .ai-highlight, .main-title span {
         color: #00a7f5 !important;
         font-weight: 800;
     }
@@ -608,13 +608,18 @@ st.markdown(
         font-family: 'Outfit', 'Prompt', sans-serif;
         font-size: 22px;
         font-weight: 700;
-        color: var(--text-color);
+        color: #1d283d !important;
         margin: 0;
         line-height: 1.2;
     }
-    .sidebar-detail h1 span {
+    .sidebar-detail h1 span, .sidebar-detail h1 .ai-highlight {
         color: #00a7f5 !important;
         font-weight: 800;
+    }
+    @media (prefers-color-scheme: dark) {
+        .main-title, .sidebar-detail h1 {
+            color: #f1f5f9 !important;
+        }
     }
     .sidebar-detail p {
         font-family: 'Outfit', sans-serif;
