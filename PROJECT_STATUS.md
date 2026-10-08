@@ -1,7 +1,7 @@
 # 🦐 Shrimp Freshness AI Project Status & Roadmap
 
-> **สถานะปัจจุบัน:** ✅ **Phase 1 เสร็จสมบูรณ์ 100% (Model Training, Pipeline & Evaluation)**  
-> **เป้าหมายถัดไป:** 🚀 **Phase 2 (Streamlit Web Application Development)**  
+> **สถานะปัจจุบัน:** ✅ **Phase 1 & Phase 2 เสร็จสมบูรณ์ 100% (Model Training & Streamlit Web App)**  
+> **เป้าหมายถัดไป:** 🚀 **Phase 3 (Cloud Deployment & Final Leaderboard Report)**  
 > **อัปเดตล่าสุด:** 2026-10-08
 
 ---
@@ -10,9 +10,9 @@
 
 | ระยะงาน (Phase) | รายละเอียด | สถานะ | สิ่งที่ส่งมอบ (Deliverables) |
 | :--- | :--- | :---: | :--- |
-| **Phase 1: Model & Pipeline** | เทรนและเปรียบเทียบโมเดล 5 สถาปัตยกรรมบน Google Colab พร้อมแก้ปัญหา Imbalance และ Pipeline ทั้งหมด | ✅ **เสร็จสมบูรณ์** | `shrimp_freshness_classification.ipynb`, โมดูล `src/`, Unit Tests 12/12 ผ่าน |
-| **Phase 2: Web Application** | สร้างเว็บแอป Streamlit สำหรับอัปโหลดภาพกุ้ง ทำนายความสด (สด/ไม่สด) แบบ Real-time พร้อม Grad-CAM | ⏳ **พร้อมเริ่มดำเนินการ** | `app.py`, โฟลเดอร์ `models/`, ทดสอบ Local & Cloud |
-| **Phase 3: Deployment & Report** | นำเสนอผลสรุป (Leaderboard, Confusion Matrices) และ Deploy เว็บแอปขึ้น Cloud | 📋 **วางแผนแล้ว** | สรุปรายงานวิจัย/โปรเจกต์ + ลิงก์เว็บแอปใช้งานจริง |
+| **Phase 1: Model & Pipeline** | เทรนและเปรียบเทียบโมเดล 5 สถาปัตยกรรมบน Google Colab พร้อมแก้ปัญหา Imbalance และ Pipeline ทั้งหมด | ✅ **เสร็จสมบูรณ์** | `notebooks/shrimp_freshness_classification.ipynb`, โมดูล `src/`, Unit Tests 12/12 ผ่าน |
+| **Phase 2: Web Application** | สร้างเว็บแอป Streamlit สำหรับอัปโหลดภาพกุ้ง ทำนายความสด (สด/ไม่สด) แบบ Real-time พร้อม Grad-CAM | ✅ **เสร็จสมบูรณ์** | `app.py`, `src/inference.py`, โมเดล 5 ตัวใน `models/`, ภาพใน `sample_images/`, Tests 29/29 ผ่าน |
+| **Phase 3: Deployment & Report** | นำเสนอผลสรุป (Leaderboard, Confusion Matrices) และ Deploy เว็บแอปขึ้น Cloud | 📋 **พร้อมดำเนินการ** | สรุปรายงานวิจัย/โปรเจกต์ + ลิงก์เว็บแอปใช้งานจริง |
 
 ---
 

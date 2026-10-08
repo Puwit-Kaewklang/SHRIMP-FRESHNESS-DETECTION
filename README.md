@@ -87,17 +87,24 @@ Shrimp_Classification/
 
 ---
 
-## 🚀 แผนงานถัดไป: Phase 2 - Streamlit Web Application
-อ่านรายละเอียดความคืบหน้า ประวัติการแก้ปัญหา และ Roadmap เต็มได้ที่:  
-👉 **`PROJECT_STATUS.md`**
+## 🖥️ การรันเว็บแอปพลิเคชัน (Streamlit Web App)
+สามารถสั่งรันหน้าเว็บทดสอบการจำแนกความสดของกุ้งในเครื่อง Local ได้ด้วยคำสั่ง:
 
-เมื่อย้ายโฟลเดอร์เรียบร้อยแล้ว เราจะเริ่มพัฒนาไฟล์ `app.py` เพื่อสร้างเว็บแอปพลิเคชันสำหรับอัปโหลดภาพกุ้งและทำนายผลทันที!
+```bash
+source .venv/bin/activate
+streamlit run app.py
+```
+* **ฟีเจอร์เด่น:**
+  * เลือกสลับทดสอบได้ทั้ง 5 โมเดล (ResNet-50, MobileNetV3, EfficientNet-B0, ViT, Custom CNN)
+  * อัปโหลดภาพกุ้งหรือคลิกภาพตัวอย่างจากเมนูได้ทันที
+  * แสดงผลระดับความสด (กุ้งสด/ไม่สด), % ความมั่นใจ, และ Latency
+  * เปิด-ปิดแสดง **Heatmap (Grad-CAM)** เพื่อดูจุดที่โมเดลใช้ตัดสินใจ
 
 ---
 
-## 🧪 การรัน Unit Tests ในเครื่อง Local
+## 🧪 การรัน Unit & Integration Tests ในเครื่อง Local
 ```bash
 source .venv/bin/activate
 pytest tests/ -v
 ```
-ผลลัพธ์: Tests ทั้งหมดผ่าน 100% (12/12 Green Suite).
+ผลลัพธ์: Tests ทั้งหมดผ่าน 100% (**29/29 Green Suite** ครอบคลุมทั้ง Data Pipeline, Models, Trainer, Inference, Grad-CAM, Real Weights E2E, และ Streamlit UI).
