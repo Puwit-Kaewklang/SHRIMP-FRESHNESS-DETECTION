@@ -1,5 +1,7 @@
 from typing import Optional, Dict, Any, List
 import os
+import io
+import base64
 from pathlib import Path
 from PIL import Image
 import torch
@@ -17,29 +19,29 @@ from src.inference import (
 # Page Configuration
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Shrimp Freshness AI Classifier",
+    page_title="ShrimpGuard AI — Quality Analysis",
     page_icon="🦐",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ---------------------------------------------------------
-# Custom Styling: Modern Blue Theme & High Legibility Font
+# Custom Styling: ShrimpGuard AI Technical Workspace Theme
 # ---------------------------------------------------------
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-    /* Global Typography: Apply Prompt font smoothly without breaking Streamlit icon fonts */
-    html, body, .stApp, [data-testid="stAppViewContainer"] {
+    /* Global Typography Base */
+    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
         font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
-    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .main-header, .sub-header, .status-desc {
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown {
         font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* Protect Streamlit icon ligatures (upload, light_mode, dark_mode, contrast, etc.) */
+    /* CRITICAL: Preserve Streamlit native icon fonts and ligatures */
     [class*="material-symbols"],
     [class*="material-icons"],
     [data-testid="stIcon"],
@@ -48,97 +50,660 @@ st.markdown(
         font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important;
     }
 
-    /* Main Headers: Adapt dynamically to Streamlit theme using CSS variables */
-    .main-header {
-        font-size: 2.3rem;
+    /* Topbar Breadcrumb & Badge */
+    .topbar-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+    }
+    .workspace-crumb {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-family: 'Outfit', sans-serif;
+        color: var(--text-color);
+        opacity: 0.65;
+        letter-spacing: 0.5px;
+    }
+    .crumb-separator {
+        opacity: 0.4;
+    }
+    .topbar-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #0284c7;
+        background: rgba(2, 132, 199, 0.1);
+        border: 1px solid rgba(2, 132, 199, 0.25);
+        padding: 4px 10px;
+        border-radius: 999px;
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 24px;
+    }
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.6px;
+        color: #0284c7;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+    .eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #0284c7;
+    }
+    .main-title {
+        font-size: 28px;
         font-weight: 700;
         color: var(--text-color);
-        margin-bottom: 0.2rem;
-        letter-spacing: -0.01em;
+        margin: 0 0 6px 0;
         line-height: 1.3;
+        letter-spacing: -0.01em;
     }
-    .header-accent {
-        color: #0284C7; /* Ocean Sky Blue: High contrast in both Light & Dark modes */
+    .main-title span {
+        color: #0284c7;
         font-weight: 800;
     }
-    .sub-header {
-        font-size: 1.05rem;
+    .main-subtitle {
+        font-size: 14px;
         color: var(--text-color);
         opacity: 0.75;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Blue Theme Containers */
-    .blue-card {
-        background: rgba(2, 132, 199, 0.06);
-        border: 1px solid rgba(2, 132, 199, 0.22);
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-    }
-
-    /* Status Cards */
-    .status-card-fresh {
-        background: rgba(16, 185, 129, 0.12);
-        border: 2px solid #10B981;
-        border-radius: 14px;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.12);
-    }
-    .status-card-not-fresh {
-        background: rgba(239, 68, 68, 0.12);
-        border: 2px solid #EF4444;
-        border-radius: 14px;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.12);
-    }
-    .status-title-fresh {
-        font-size: 2.1rem;
-        font-weight: 800;
-        color: #10B981;
-        margin-bottom: 0.4rem;
-    }
-    .status-title-not-fresh {
-        font-size: 2.1rem;
-        font-weight: 800;
-        color: #EF4444;
-        margin-bottom: 0.4rem;
-    }
-    .status-desc {
-        color: var(--text-color);
-        font-size: 1.05rem;
         margin: 0;
-        opacity: 0.88;
         line-height: 1.5;
     }
 
-    /* Blue Accent Badges */
-    .metric-badge-blue {
-        display: inline-block;
-        padding: 0.35rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.875rem;
+    /* Step Headings */
+    .step-heading-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(125, 140, 160, 0.2);
+        padding-bottom: 8px;
+        margin-top: 14px;
+        margin-bottom: 14px;
+    }
+    .step-heading-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .step-heading-left h3 {
+        font-size: 17px;
         font-weight: 600;
-        background-color: rgba(2, 132, 199, 0.15);
-        color: #0284C7;
-        border: 1px solid rgba(2, 132, 199, 0.35);
-        margin-right: 0.5rem;
+        color: var(--text-color);
+        margin: 0;
+    }
+    .step-label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: #0284c7;
+        background: rgba(2, 132, 199, 0.1);
+        border: 1px solid rgba(2, 132, 199, 0.25);
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .status-pill {
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: rgba(2, 132, 199, 0.12);
+        color: #0284c7;
     }
 
-    /* Sidebar Section Headings: Prominent & Clean */
-    .sidebar-section-title {
-        font-family: 'Prompt', sans-serif !important;
-        font-size: 1.45rem;
+    /* Upload Zone */
+    .upload-zone-box {
+        background: var(--secondary-background-color);
+        border: 1.5px dashed rgba(2, 132, 199, 0.4);
+        border-radius: 16px;
+        padding: 24px 20px;
+        text-align: center;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+    .upload-icon-circle {
+        width: 52px;
+        height: 52px;
+        background: rgba(2, 132, 199, 0.12);
+        color: #0284c7;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 8px;
+    }
+    .upload-zone-box h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 4px 0;
+    }
+    .upload-zone-box p {
+        font-size: 12px;
+        color: var(--text-color);
+        opacity: 0.7;
+        margin: 0 0 8px 0;
+    }
+    .file-formats-note {
+        font-family: 'Outfit', sans-serif;
+        font-size: 11px;
+        color: var(--text-color);
+        opacity: 0.55;
+    }
+
+    /* Sample Cards */
+    .sample-card {
+        background: var(--secondary-background-color);
+        border: 1px solid rgba(125, 140, 160, 0.2);
+        border-radius: 14px;
+        padding: 12px;
+        text-align: center;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .sample-tag-fresh {
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: #10B981;
+        background: rgba(16, 185, 129, 0.12);
+        padding: 2px 7px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 6px;
+    }
+    .sample-tag-not-fresh {
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: #EF4444;
+        background: rgba(239, 68, 68, 0.12);
+        padding: 2px 7px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 6px;
+    }
+
+    /* Preview Panel */
+    .preview-panel {
+        background: var(--secondary-background-color);
+        border: 1px solid rgba(125, 140, 160, 0.22);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+    .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+    .preview-filename {
+        font-family: 'Outfit', monospace;
+        font-size: 11px;
+        background: rgba(125, 140, 160, 0.15);
+        color: var(--text-color);
+        padding: 3px 8px;
+        border-radius: 6px;
+        max-width: 220px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .preview-image-container {
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(125, 140, 160, 0.15);
+    }
+    .preview-badge {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        color: #38bdf8;
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 4px 9px;
+        border-radius: 6px;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .preview-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 11px;
+        color: var(--text-color);
+        opacity: 0.65;
+    }
+
+    /* Classification Result Cards */
+    .fresh-result-card {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 22px;
+    }
+    .not-fresh-result-card {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.35);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 22px;
+    }
+    .result-icon-fresh {
+        background: #10B981;
+        width: 52px;
+        height: 52px;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    }
+    .result-icon-not-fresh {
+        background: #EF4444;
+        width: 52px;
+        height: 52px;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+    }
+    .result-overline-fresh {
+        font-family: 'Outfit', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: #10B981;
+        text-transform: uppercase;
+    }
+    .result-overline-not-fresh {
+        font-family: 'Outfit', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: #EF4444;
+        text-transform: uppercase;
+    }
+    .result-title-fresh {
+        font-size: 26px;
+        font-weight: 700;
+        color: #10B981;
+        margin: 3px 0 5px 0;
+        line-height: 1.2;
+    }
+    .result-title-not-fresh {
+        font-size: 26px;
+        font-weight: 700;
+        color: #EF4444;
+        margin: 3px 0 5px 0;
+        line-height: 1.2;
+    }
+    .result-desc {
+        color: var(--text-color);
+        font-size: 13px;
+        opacity: 0.85;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Probability Panel */
+    .probability-panel {
+        background: var(--secondary-background-color);
+        border: 1px solid rgba(125, 140, 160, 0.22);
+        border-radius: 16px;
+        padding: 20px 22px;
+        margin-top: 14px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+    .prob-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    .prob-title-row h4 {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0;
+    }
+    .prob-sub-badge {
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        letter-spacing: 0.8px;
+        color: #0284c7;
+        background: rgba(2, 132, 199, 0.12);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+    }
+    .prob-item {
+        margin-bottom: 14px;
+    }
+    .prob-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        font-size: 13px;
+    }
+    .prob-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+    .prob-dot-fresh {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #10B981;
+        display: inline-block;
+    }
+    .prob-dot-not-fresh {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #EF4444;
+        display: inline-block;
+    }
+    .prob-val-fresh {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: #10B981;
+        font-size: 15px;
+    }
+    .prob-val-not-fresh {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: #EF4444;
+        font-size: 15px;
+    }
+    .custom-progress-bg {
+        width: 100%;
+        height: 8px;
+        background: rgba(125, 140, 160, 0.18);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .custom-progress-fill-fresh {
+        height: 100%;
+        background: linear-gradient(90deg, #10B981, #34D399);
+        border-radius: 999px;
+    }
+    .custom-progress-fill-not-fresh {
+        height: 100%;
+        background: linear-gradient(90deg, #EF4444, #F87171);
+        border-radius: 999px;
+    }
+
+    /* Result Metrics */
+    .result-metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 14px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(125, 140, 160, 0.18);
+    }
+    .metric-box {
+        background: rgba(2, 132, 199, 0.05);
+        border: 1px solid rgba(2, 132, 199, 0.15);
+        border-radius: 12px;
+        padding: 10px 12px;
+    }
+    .metric-box-label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: var(--text-color);
+        opacity: 0.6;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+    }
+    .metric-box-value {
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 13px;
         font-weight: 700;
         color: var(--text-color);
-        margin-top: 0.3rem;
-        margin-bottom: 0.75rem;
-        letter-spacing: -0.01em;
-        line-height: 1.35;
+    }
+
+    /* Notice Box */
+    .analysis-notice-card {
+        background: rgba(2, 132, 199, 0.06);
+        border: 1px solid rgba(2, 132, 199, 0.2);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .analysis-notice-card p {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-color);
+        opacity: 0.85;
+        margin: 0;
+    }
+
+    /* Footer */
+    .main-footer {
+        border-top: 1px solid rgba(125, 140, 160, 0.2);
+        color: var(--text-color);
+        opacity: 0.6;
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: 0.6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 36px;
+        padding: 20px 0;
+        font-size: 11px;
+    }
+
+    /* Sidebar Custom Elements */
+    .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(125, 140, 160, 0.2);
+        margin-bottom: 16px;
+    }
+    .brand-mark {
+        font-size: 32px;
+        line-height: 1;
+    }
+    .sidebar-detail h1 {
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-color);
+        margin: 0;
+        line-height: 1.2;
+    }
+    .sidebar-detail h1 span {
+        color: #0284c7;
+    }
+    .sidebar-detail p {
+        font-family: 'Outfit', sans-serif;
+        font-size: 9px;
+        letter-spacing: 1.2px;
+        color: var(--text-color);
+        opacity: 0.6;
+        margin: 2px 0 0 0;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    .sidebar-section-title {
+        font-family: 'Prompt', sans-serif !important;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-top: 14px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         border-bottom: 2px solid rgba(2, 132, 199, 0.3);
-        padding-bottom: 0.45rem;
+        padding-bottom: 6px;
+    }
+    .model-family-text {
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 12px;
+        color: #0284c7;
+        font-weight: 600;
+        margin-top: 6px;
+        margin-bottom: 8px;
+    }
+    .model-specs-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border-top: 1px solid rgba(125, 140, 160, 0.15);
+        padding-top: 10px;
+        margin-top: 8px;
+    }
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 11px;
+    }
+    .spec-item span {
+        color: var(--text-color);
+        opacity: 0.65;
+    }
+    .spec-item strong {
+        color: var(--text-color);
+        font-weight: 600;
+    }
+    .sidebar-note {
+        background: rgba(2, 132, 199, 0.05);
+        border: 1px solid rgba(2, 132, 199, 0.15);
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-top: 12px;
+        font-size: 11px;
+        color: var(--text-color);
+        opacity: 0.75;
+        line-height: 1.4;
+    }
+    .system-status-box {
+        background: rgba(2, 132, 199, 0.06);
+        border: 1px solid rgba(2, 132, 199, 0.2);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 10px;
+    }
+    .system-specs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-family: 'Outfit', 'Prompt', sans-serif;
+        font-size: 11px;
+    }
+    .system-specs div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .system-specs span {
+        color: var(--text-color);
+        opacity: 0.65;
+    }
+    .system-specs strong {
+        color: var(--text-color);
+        font-weight: 600;
+    }
+    .active-pill {
+        color: #10B981;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        font-size: 10px;
+    }
+    .system-track {
+        width: 100%;
+        height: 4px;
+        background: rgba(125, 140, 160, 0.2);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 4px;
+    }
+    .system-track-fill {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #0284c7, #38bdf8);
+    }
+    .status-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        color: #10B981;
+        margin-top: 16px;
+        padding: 6px 10px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 6px #10B981;
     }
     </style>
     """,
@@ -146,37 +711,57 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# Model Metadata Dictionary
+# Model Metadata Dictionary (Aligned with ShrimpGuard AI)
 # ---------------------------------------------------------
 MODEL_DETAILS: Dict[str, Dict[str, Any]] = {
     "resnet50": {
+        "id": "resnet50",
         "display_name": "ResNet-50",
-        "description": "Residual Network 50 Layers (Industry Standard)",
-        "params": "~25.6M parameters",
-        "type": "CNN",
-    },
-    "mobilenet_v3": {
-        "display_name": "MobileNetV3-Large",
-        "description": "Lightweight & Fast (Edge AI & IoT)",
-        "params": "~5.4M parameters",
-        "type": "CNN",
-    },
-    "efficientnet_b0": {
-        "display_name": "EfficientNet-B0",
-        "description": "Compound Scaling Architecture",
-        "params": "~5.3M parameters",
+        "name_full": "ResNet-50 (CNN)",
+        "family": "Residual Neural Network",
+        "params": "25.6M",
+        "input": "224 × 224",
+        "layers": "50 layers",
         "type": "CNN",
     },
     "vit_b_16": {
-        "display_name": "Vision Transformer (ViT-B/16)",
-        "description": "Pure Self-Attention Transformer",
-        "params": "~86.0M parameters",
+        "id": "vit_b_16",
+        "display_name": "Vision Transformer",
+        "name_full": "Vision Transformer (ViT)",
+        "family": "Vision Transformer · ViT-B/16",
+        "params": "86.6M",
+        "input": "224 × 224",
+        "layers": "12 encoder blocks",
         "type": "Transformer",
     },
+    "efficientnet_b0": {
+        "id": "efficientnet_b0",
+        "display_name": "EfficientNet-B0",
+        "name_full": "EfficientNet-B0",
+        "family": "EfficientNet · Convolutional Network",
+        "params": "5.3M",
+        "input": "224 × 224",
+        "layers": "MBConv blocks",
+        "type": "CNN",
+    },
+    "mobilenet_v3": {
+        "id": "mobilenet_v3",
+        "display_name": "MobileNetV3-Large",
+        "name_full": "MobileNetV3-Large",
+        "family": "MobileNet · Lightweight CNN",
+        "params": "5.4M",
+        "input": "224 × 224",
+        "layers": "Inverted residual blocks",
+        "type": "CNN",
+    },
     "custom_cnn": {
-        "display_name": "Custom CNN (Baseline)",
-        "description": "4-Block Convolutional Network from scratch",
-        "params": "~2.1M parameters",
+        "id": "custom_cnn",
+        "display_name": "Custom CNN",
+        "name_full": "Custom CNN (Baseline)",
+        "family": "Custom 4-Block ConvNet",
+        "params": "2.1M",
+        "input": "224 × 224",
+        "layers": "4 Conv blocks",
         "type": "CNN",
     },
 }
@@ -207,108 +792,270 @@ def load_available_samples() -> Dict[str, List[str]]:
         dir_path = Path(f"sample_images/{category}")
         if dir_path.exists():
             for ext in ["*.jpg", "*.jpeg", "*.png", "*.webp"]:
-                samples[category].extend([str(p) for p in dir_path.glob(ext)])
+                samples[category].extend(sorted([str(p) for p in dir_path.glob(ext)]))
     return samples
 
 
+def image_to_base64(image: Image.Image, max_dim: int = 800) -> str:
+    preview = image.copy()
+    preview.thumbnail((max_dim, max_dim))
+    buffered = io.BytesIO()
+    preview.save(buffered, format="JPEG", quality=85)
+    return base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+
+def get_confidence_tier(conf: float) -> str:
+    if conf >= 95.0:
+        return "Very High"
+    elif conf >= 80.0:
+        return "High"
+    elif conf >= 65.0:
+        return "Moderate"
+    return "Low"
+
+
 # ---------------------------------------------------------
-# Sidebar Configuration: Clean Ocean Blue
+# Sidebar Configuration: ShrimpGuard AI Technical Sidebar
 # ---------------------------------------------------------
 device = get_device()
 device_label = "Apple Silicon GPU (MPS)" if device.type == "mps" else ("NVIDIA CUDA GPU" if device.type == "cuda" else "CPU")
 
+# Brand Row
+st.sidebar.markdown(
+    """
+    <div class="brand-row">
+        <span class="brand-mark">🦐</span>
+        <div class="sidebar-detail">
+            <h1>ShrimpGuard <span>AI</span></h1>
+            <p>QUALITY ANALYSIS</p>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Section 1: Model Settings
 st.sidebar.markdown('<div class="sidebar-section-title">🦐 ตั้งค่าโมเดล AI</div>', unsafe_allow_html=True)
 
 model_options = list(MODEL_DETAILS.keys())
 selected_model_key = st.sidebar.selectbox(
-    "เลือกสถาปัตยกรรมโมเดล:",
+    "โมเดลที่ใช้วิเคราะห์:",
     options=model_options,
-    format_func=lambda k: f"{MODEL_DETAILS[k]['display_name']} ({MODEL_DETAILS[k]['type']})",
+    format_func=lambda k: f"{MODEL_DETAILS[k]['name_full']}",
     index=0,
 )
 
 model_info = MODEL_DETAILS[selected_model_key]
-st.sidebar.caption(f"ℹ️ **รายละเอียด:** {model_info['description']}")
-st.sidebar.caption(f"📊 **ขนาดโมเดล:** {model_info['params']}")
 
-# Load Model
+# Model specs breakdown
+st.sidebar.markdown(
+    f"""
+    <div class="model-family-text">{model_info['family']}</div>
+    <div class="model-specs-grid">
+        <div class="spec-item">
+            <span>Parameters</span>
+            <strong>{model_info['params']}</strong>
+        </div>
+        <div class="spec-item">
+            <span>Input size</span>
+            <strong>{model_info['input']} px</strong>
+        </div>
+        <div class="spec-item">
+            <span>Architecture</span>
+            <strong>{model_info['layers']}</strong>
+        </div>
+    </div>
+    <div class="sidebar-note">
+        ผลการวิเคราะห์ขึ้นอยู่กับสถาปัตยกรรมโมเดลและคุณภาพของภาพ
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Load Model Weights
 model, resolved_weights_path = get_cached_model(selected_model_key)
 
-st.sidebar.divider()
+# Section 2: System Status
 st.sidebar.markdown('<div class="sidebar-section-title">⚙️ ข้อมูลระบบและการประมวลผล</div>', unsafe_allow_html=True)
-st.sidebar.markdown(f"**⚡ ฮาร์ดแวร์:** `{device_label}`")
 
-if resolved_weights_path:
-    file_size_mb = os.path.getsize(resolved_weights_path) / (1024 * 1024)
-    st.sidebar.success(f"✅ โหลด Weights: `{os.path.basename(resolved_weights_path)}` ({file_size_mb:.1f} MB)")
-else:
-    st.sidebar.warning("⚠️ ไม่พบไฟล์ .pth (รันในโหมดโครงสร้างเริ่มต้น)")
+weights_filename = os.path.basename(resolved_weights_path) if resolved_weights_path else "None"
+weights_size_mb = (os.path.getsize(resolved_weights_path) / (1024 * 1024)) if resolved_weights_path else 0.0
 
-
-# ---------------------------------------------------------
-# Main Page Header
-# ---------------------------------------------------------
-st.markdown(
-    """
-    <div class="main-header">
-        🦐 ระบบจำแนกความสดของกุ้งด้วย AI
+st.sidebar.markdown(
+    f"""
+    <div class="system-status-box">
+        <div class="system-specs">
+            <div>
+                <span>Inference Engine</span>
+                <strong>PyTorch ({device_label})</strong>
+            </div>
+            <div>
+                <span>Model Weights</span>
+                <strong class="active-pill">ACTIVE ({weights_size_mb:.1f} MB)</strong>
+            </div>
+            <div class="system-track">
+                <div class="system-track-fill"></div>
+            </div>
+        </div>
     </div>
-    <div class="sub-header">
-        ระบบตรวจสอบคุณภาพและจำแนกความสดของกุ้งแบบอัตโนมัติด้วย Deep Learning (CNNs & Vision Transformer)
+    <div class="status-line">
+        <span class="status-dot"></span>
+        <span>ONLINE · PRODUCTION WORKSPACE</span>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------
-# Image Input Section
+# Main Page Header & Eyebrow
 # ---------------------------------------------------------
-tab_upload, tab_sample = st.tabs(["📤 อัปโหลดภาพของคุณ", "🖼️ เลือกจากภาพตัวอย่างในระบบ"])
+st.markdown(
+    """
+    <div class="topbar-row">
+        <div class="workspace-crumb">
+            <span>Workspace</span>
+            <span class="crumb-separator">/</span>
+            <strong>Freshness analysis</strong>
+        </div>
+        <span class="topbar-badge">
+            🛡️ AI QUALITY INSPECTION
+        </span>
+    </div>
+    <header class="page-header">
+        <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            SHRIMP FRESHNESS DETECTION
+        </div>
+        <h2 class="main-title">ระบบจำแนกความสดของกุ้งด้วย AI</h2>
+        <p class="main-subtitle">ตรวจสอบคุณภาพความสดของกุ้งด้วยเทคโนโลยี Deep Learning</p>
+    </header>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ---------------------------------------------------------
+# Step 1: Image Input Section
+# ---------------------------------------------------------
+st.markdown(
+    """
+    <div class="step-heading-row">
+        <div class="step-heading-left">
+            <h3>แหล่งภาพ</h3>
+        </div>
+        <span class="step-label">01 / IMAGE INPUT</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Image state handling: Default to first sample image on start
+available_samples = load_available_samples()
+default_sample_path = available_samples["fresh"][0] if available_samples["fresh"] else None
+
+if "active_sample_path" not in st.session_state:
+    st.session_state["active_sample_path"] = default_sample_path
+
+tab_upload, tab_sample = st.tabs(["📤 อัปโหลดภาพของคุณ", "🖼️ ภาพตัวอย่าง"])
 
 current_image: Optional[Image.Image] = None
-image_source_label = ""
+current_filename = "SHRIMP_SAMPLE.JPG"
+is_uploaded = False
+file_size_mb = 0.0
 
 with tab_upload:
+    st.markdown(
+        """
+        <div class="upload-zone-box">
+            <div class="upload-icon-circle">📤</div>
+            <h4>ลากภาพกุ้งมาวางที่นี่</h4>
+            <p>หรือเลือกไฟล์ภาพจากอุปกรณ์ของคุณด้านล่าง</p>
+            <div class="file-formats-note">JPG, PNG, WEBP • สูงสุด 20 MB</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     uploaded_file = st.file_uploader(
-        "ลากและวางไฟล์ภาพกุ้งที่นี่ หรือคลิกเพื่อเลือกไฟล์",
+        "เลือกไฟล์ภาพกุ้ง:",
         type=["jpg", "jpeg", "png", "webp"],
-        help="รองรับไฟล์ JPEG, PNG และ WEBP",
+        label_visibility="collapsed",
     )
     if uploaded_file is not None:
         try:
             current_image = Image.open(uploaded_file).convert("RGB")
-            image_source_label = f"ไฟล์ที่อัปโหลด: {uploaded_file.name}"
+            current_filename = uploaded_file.name
+            file_size_mb = uploaded_file.size / (1024 * 1024)
+            is_uploaded = True
         except Exception as e:
             st.error(f"ไม่สามารถเปิดไฟล์ภาพได้: {e}")
 
 with tab_sample:
-    samples = load_available_samples()
-    col_fresh, col_not_fresh = st.columns(2)
+    st.caption("เลือกภาพกุ้งจากชุดข้อมูลจริงเพื่อทดสอบการจำแนกทันที:")
+    col_s1, col_s2 = st.columns(2)
     
-    with col_fresh:
-        st.markdown("**🟢 ภาพตัวอย่างกุ้งสด (Fresh):**")
-        for s_path in samples["fresh"]:
-            filename = os.path.basename(s_path)
-            if st.button(f"เลือก: {filename}", key=f"btn_{s_path}", use_container_width=True):
-                current_image = Image.open(s_path).convert("RGB")
-                image_source_label = f"ภาพตัวอย่างกุ้งสด: {filename}"
-                
-    with col_not_fresh:
-        st.markdown("**🔴 ภาพตัวอย่างกุ้งไม่สด (Not Fresh):**")
-        for s_path in samples["not_fresh"]:
-            filename = os.path.basename(s_path)
-            if st.button(f"เลือก: {filename}", key=f"btn_{s_path}", use_container_width=True):
-                current_image = Image.open(s_path).convert("RGB")
-                image_source_label = f"ภาพตัวอย่างกุ้งไม่สด: {filename}"
+    with col_s1:
+        st.markdown("**🟢 ตัวอย่างกุ้งสด (Fresh Samples):**")
+        for s_path in available_samples["fresh"]:
+            fn = os.path.basename(s_path)
+            c1, c2 = st.columns([1, 2])
+            with c1:
+                try:
+                    thumb = Image.open(s_path)
+                    st.image(thumb, use_container_width=True)
+                except Exception:
+                    pass
+            with c2:
+                st.markdown(f'<span class="sample-tag-fresh">FRESH SAMPLE</span>', unsafe_allow_html=True)
+                st.write(f"`{fn}`")
+                if st.button("เลือกภาพนี้", key=f"btn_{s_path}", use_container_width=True):
+                    st.session_state["active_sample_path"] = s_path
+                    st.rerun()
+
+    with col_s2:
+        st.markdown("**🔴 ตัวอย่างกุ้งไม่สด (Not Fresh Samples):**")
+        for s_path in available_samples["not_fresh"]:
+            fn = os.path.basename(s_path)
+            c1, c2 = st.columns([1, 2])
+            with c1:
+                try:
+                    thumb = Image.open(s_path)
+                    st.image(thumb, use_container_width=True)
+                except Exception:
+                    pass
+            with c2:
+                st.markdown(f'<span class="sample-tag-not-fresh">NOT FRESH SAMPLE</span>', unsafe_allow_html=True)
+                st.write(f"`{fn}`")
+                if st.button("เลือกภาพนี้", key=f"btn_{s_path}", use_container_width=True):
+                    st.session_state["active_sample_path"] = s_path
+                    st.rerun()
+
+# Fallback to chosen sample if no user upload
+if current_image is None and st.session_state["active_sample_path"] and os.path.exists(st.session_state["active_sample_path"]):
+    sample_p = st.session_state["active_sample_path"]
+    current_image = Image.open(sample_p).convert("RGB")
+    current_filename = os.path.basename(sample_p)
+    file_size_mb = os.path.getsize(sample_p) / (1024 * 1024)
+    is_uploaded = False
 
 # ---------------------------------------------------------
-# Inference & Results Section (Clean & Focused, No Heatmap)
+# Step 2: Analysis Result Section
 # ---------------------------------------------------------
+demo_badge_text = "วิเคราะห์เรียลไทม์" if is_uploaded else "ผลตัวอย่าง"
+
+st.markdown(
+    f"""
+    <div class="step-heading-row" style="margin-top: 24px;">
+        <div class="step-heading-left">
+            <h3>⚡ ผลการวิเคราะห์</h3>
+            <span class="status-pill">{demo_badge_text}</span>
+        </div>
+        <span class="step-label">02 / ANALYSIS RESULT</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 if current_image is not None:
-    st.divider()
-    st.markdown(f"#### 🔎 ผลการวิเคราะห์ภาพ ({image_source_label})")
-
-    # Run Prediction
+    # Run PyTorch Model Prediction
     with st.spinner("โมเดลกำลังประมวลผล..."):
         result = predict_image(model, current_image, device=device)
 
@@ -317,23 +1064,48 @@ if current_image is not None:
     prob_fresh = result["probabilities"]["fresh"]
     prob_not_fresh = result["probabilities"]["not_fresh"]
     latency_ms = result["latency_ms"]
+    confidence_tier = get_confidence_tier(confidence)
 
-    col_view, col_metrics = st.columns([1, 1], gap="large")
+    # Encode image thumbnail for preview card
+    img_b64 = image_to_base64(current_image)
+    image_badge_text = "UPLOADED IMAGE" if is_uploaded else "SAMPLE IMAGE"
+    preview_tag = "LOCAL PREVIEW" if is_uploaded else "DATASET SAMPLE"
 
-    with col_view:
-        st.markdown("**🖼️ ภาพที่ทำการวิเคราะห์:**")
-        st.image(current_image, use_container_width=True)
+    col_preview, col_analysis = st.columns([1, 1], gap="large")
 
-    with col_metrics:
-        # Status Result Card
+    with col_preview:
+        st.markdown(
+            f"""
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <span>📷 ภาพที่ทำการวิเคราะห์</span>
+                    <span class="preview-filename">{current_filename}</span>
+                </div>
+                <div class="preview-image-container">
+                    <img src="data:image/jpeg;base64,{img_b64}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;" alt="Shrimp Image" />
+                    <span class="preview-badge">{image_badge_text}</span>
+                </div>
+                <div class="preview-footer">
+                    <span>{file_size_mb:.2f} MB / {preview_tag}</span>
+                    <span>100% QUALITY</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col_analysis:
+        # 1. Classification Banner Card
         if is_fresh:
             st.markdown(
                 """
-                <div class="status-card-fresh">
-                    <div class="status-title-fresh">🟢 กุ้งสด (FRESH)</div>
-                    <p class="status-desc">
-                        ระดับความสดอยู่ในเกณฑ์มาตรฐาน เหมาะสำหรับการบริโภคหรือแปรรูป
-                    </p>
+                <div class="fresh-result-card">
+                    <div class="result-icon-fresh">✓</div>
+                    <div>
+                        <div class="result-overline-fresh">AI CLASSIFICATION RESULT</div>
+                        <h3 class="result-title-fresh">กุ้งสด (FRESH)</h3>
+                        <p class="result-desc">ระดับความสดอยู่ในเกณฑ์มาตรฐาน เหมาะสำหรับการบริโภคหรือแปรรูป</p>
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -341,40 +1113,88 @@ if current_image is not None:
         else:
             st.markdown(
                 """
-                <div class="status-card-not-fresh">
-                    <div class="status-title-not-fresh">🔴 กุ้งไม่สด (NOT FRESH)</div>
-                    <p class="status-desc">
-                        ตรวจพบสัญญาณการเสื่อมสภาพ ไม่แนะนำสำหรับการบริโภคสด
-                    </p>
+                <div class="not-fresh-result-card">
+                    <div class="result-icon-not-fresh">✕</div>
+                    <div>
+                        <div class="result-overline-not-fresh">AI CLASSIFICATION RESULT</div>
+                        <h3 class="result-title-not-fresh">กุ้งไม่สด (NOT FRESH)</h3>
+                        <p class="result-desc">ตรวจพบสัญญาณการเสื่อมสภาพ ไม่แนะนำสำหรับการบริโภคสด</p>
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-        st.write("")
-        st.markdown("##### 📊 ความน่าจะเป็นของแต่ละคลาส (Class Probabilities)")
-        
-        # Progress bars with blue and status indicators
-        st.write(f"**กุ้งสด (Fresh):** `{prob_fresh:.1f}%`")
-        st.progress(min(prob_fresh / 100.0, 1.0))
+        # 2. Probability Panel with Styled Meters
+        st.markdown(
+            f"""
+            <div class="probability-panel">
+                <div class="prob-title-row">
+                    <h4>ความน่าจะเป็นของแต่ละคลาส</h4>
+                    <span class="prob-sub-badge">CLASS PROBABILITIES</span>
+                </div>
+                <div class="prob-item">
+                    <div class="prob-header">
+                        <span class="prob-label"><i class="prob-dot-fresh"></i> กุ้งสด <small style="opacity:0.65;">(Fresh)</small></span>
+                        <strong class="prob-val-fresh">{prob_fresh:.1f}%</strong>
+                    </div>
+                    <div class="custom-progress-bg">
+                        <div class="custom-progress-fill-fresh" style="width: {prob_fresh:.1f}%;"></div>
+                    </div>
+                </div>
+                <div class="prob-item" style="margin-top: 14px;">
+                    <div class="prob-header">
+                        <span class="prob-label"><i class="prob-dot-not-fresh"></i> กุ้งไม่สด <small style="opacity:0.65;">(Not Fresh)</small></span>
+                        <strong class="prob-val-not-fresh">{prob_not_fresh:.1f}%</strong>
+                    </div>
+                    <div class="custom-progress-bg">
+                        <div class="custom-progress-fill-not-fresh" style="width: {prob_not_fresh:.1f}%;"></div>
+                    </div>
+                </div>
+                <div class="result-metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-box-label">CONFIDENCE LEVEL</div>
+                        <div class="metric-box-value">{confidence_tier}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-box-label">SELECTED MODEL</div>
+                        <div class="metric-box-value">{model_info['display_name']}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-box-label">LATENCY</div>
+                        <div class="metric-box-value">{latency_ms:.1f} ms</div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-        st.write(f"**กุ้งไม่สด (Not Fresh):** `{prob_not_fresh:.1f}%`")
-        st.progress(min(prob_not_fresh / 100.0, 1.0))
-
-        st.divider()
-        st.markdown("##### ⏱️ ข้อมูลประสิทธิภาพการทำนาย (Benchmark Metrics)")
-        m_col1, m_col2, m_col3 = st.columns(3)
-        m_col1.metric("ความมั่นใจ (Confidence)", f"{confidence:.1f}%")
-        m_col2.metric("เวลาประมวลผล (Latency)", f"{latency_ms:.1f} ms")
-        m_col3.metric("โมเดลที่ใช้งาน", model_info["display_name"])
+    # 3. Quality Assurance Notice Card
+    st.markdown(
+        """
+        <div class="analysis-notice-card">
+            <span style="font-size: 16px; line-height: 1;">💡</span>
+            <p>
+                <strong>ข้อสังเกต:</strong> ผลการวิเคราะห์ประเมินด้วยแบบจำลอง Deep Learning สำหรับการคัดกรองเบื้องต้น ควรใช้ร่วมกับการประเมินทางกายภาพ (กลิ่น สี สัมผัสความแน่นของเนื้อ) และการควบคุมอุณหภูมิ เพื่อความปลอดภัยสูงสุดในการบริโภค
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 else:
-    st.info("👆 กรุณาอัปโหลดภาพกุ้ง หรือคลิกเลือกภาพตัวอย่างจากแถบด้านบนเพื่อเริ่มการวิเคราะห์")
+    st.info("กรุณาอัปโหลดภาพกุ้ง หรือเลือกภาพตัวอย่างจากแท็บด้านบนเพื่อเริ่มการวิเคราะห์")
 
 # ---------------------------------------------------------
 # Footer
 # ---------------------------------------------------------
-st.markdown("---")
-st.caption(
-    "🦐 **Shrimp Freshness Classification System** | พัฒนาด้วย PyTorch & Streamlit | รองรับ 5 โมเดล (Custom CNN, MobileNetV3, ResNet-50, EfficientNet-B0, ViT-B/16)"
+st.markdown(
+    """
+    <footer class="main-footer">
+        <span>SHRIMPGUARD AI · DEEP LEARNING QUALITY INSPECTION</span>
+        <span>POWERED BY PYTORCH & STREAMLIT</span>
+    </footer>
+    """,
+    unsafe_allow_html=True,
 )
