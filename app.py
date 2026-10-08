@@ -887,7 +887,21 @@ st.sidebar.markdown(
 )
 
 # Section 1: Model Settings
-st.sidebar.markdown('<div class="sidebar-section-title">🦐 ตั้งค่าโมเดล AI</div>', unsafe_allow_html=True)
+st.sidebar.markdown(
+    """
+    <div class="sidebar-section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+            <path d="M11 12h.01" stroke-width="2.6" />
+            <path d="M13 22c.5-.5 1.12-1 2.5-1-1.38 0-2-.5-2.5-1" />
+            <path d="M14 2a3.28 3.28 0 0 1-3.227 1.798l-6.17-.561A2.387 2.387 0 1 0 4.387 8H15.5a1 1 0 0 1 0 13 1 1 0 0 0 0-5H12a7 7 0 0 1-7-7V8" />
+            <path d="M14 8a8.5 8.5 0 0 1 0 8" />
+            <path d="M16 16c2 0 4.5-4 4-6" />
+        </svg>
+        <span>ตั้งค่าโมเดล AI</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 model_options = list(MODEL_DETAILS.keys())
 selected_model_key = st.sidebar.selectbox(
@@ -928,7 +942,18 @@ st.sidebar.markdown(
 model, resolved_weights_path = get_cached_model(selected_model_key)
 
 # Section 2: System Status
-st.sidebar.markdown('<div class="sidebar-section-title">⚙️ ข้อมูลระบบและการประมวลผล</div>', unsafe_allow_html=True)
+st.sidebar.markdown(
+    """
+    <div class="sidebar-section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span>ข้อมูลระบบและการประมวลผล</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 weights_filename = os.path.basename(resolved_weights_path) if resolved_weights_path else "None"
 weights_size_mb = (os.path.getsize(resolved_weights_path) / (1024 * 1024)) if resolved_weights_path else 0.0
