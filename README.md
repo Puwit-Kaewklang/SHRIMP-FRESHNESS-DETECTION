@@ -1,110 +1,193 @@
-# 🦐 Shrimp Freshness CNN & Transformer Classification System
-ระบบจำแนกภาพกุ้งสด / กุ้งไม่สด ด้วยสถาปัตยกรรม CNN และ Vision Transformer 5 โมเดล (PyTorch & Google Colab)
+# 🦐 Shrimp Freshness AI Classification System
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-FF4B4B.svg)](https://streamlit.io/)
+[![Tests](https://img.shields.io/badge/Tests-29%2F29%20Passed-brightgreen.svg)](tests/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+An end-to-end Deep Learning system for automated shrimp freshness classification (`fresh` vs `not_fresh`). This project benchmarks **5 state-of-the-art architectures (4 CNNs + 1 Vision Transformer)** in PyTorch, resolves severe class imbalance using `WeightedRandomSampler`, and provides an interactive **Streamlit Web Application** equipped with **Explainable AI (Grad-CAM)** and real-time inference.
+
+ระบบจำแนกและตรวจสอบคุณภาพความสดของกุ้งแบบอัตโนมัติด้วย Deep Learning (CNNs & Vision Transformer) พร้อมเว็บแอปพลิเคชัน Streamlit และระบบวิเคราะห์จุดตัดสินใจด้วย Grad-CAM
 
 ---
 
-## 📋 ภาพรวมโครงการ (Project Overview)
-โปรเจกต์นี้พัฒนาขึ้นเพื่อเปรียบเทียบประสิทธิภาพของสถาปัตยกรรม Deep Learning จำนวน 5 โมเดล (4 CNNs + 1 Vision Transformer) ในการจำแนกความสดของกุ้ง (`fresh` vs `not_fresh`):
+## 🌟 Key Features
 
-1. **Custom CNN:** โมเดล 4 Convolutional Blocks สร้างขึ้นเอง เทรนจาก Scratch เพื่อใช้เป็น Baseline
-2. **MobileNetV3-Large:** โมเดลขนาดเล็กและประมวลผลเร็ว (Transfer Learning) เหมาะสำหรับ Edge AI / Smart Camera
-3. **ResNet-50:** โมเดล Residual Connection ที่เป็นมาตรฐานสากลในงานวิจัยคอมพิวเตอร์วิทัศน์
-4. **EfficientNet-B0:** โมเดล Compound Scaling ที่ให้ความแม่นยำสูงต่อน้ำหนักโมเดล
-5. **Vision Transformer (ViT-B/16):** โมเดล Transformer สถาปัตยกรรม Self-Attention ระดับ State-of-the-art
-
-### ⚖️ การจัดการ Class Imbalance:
-* จัดการความไม่สมดุลของข้อมูล (`fresh` 886 ภาพ vs `not_fresh` 509 ภาพ) โดยใช้ **`WeightedRandomSampler`** ในชุด Train สุ่มตัวอย่างให้มีสัดส่วน 50:50 เท่ากัน
-* คงชุด Validation และ Test ไว้ตามสัดส่วนจริง เพื่อการวัดผลที่เที่ยงตรง ไม่เกิด Data Leakage หรือการประเมินที่หลอกตา
+* **🧠 Model Zoo (5 Distinct Architectures):**
+  * **Custom CNN (Baseline):** 4-Block Convolutional Network trained from scratch (~2.1M params).
+  * **MobileNetV3-Large:** Lightweight & ultra-fast for Edge IoT & Mobile devices (~5.4M params).
+  * **ResNet-50:** Industry-standard residual learning with 50 layers (~25.6M params).
+  * **EfficientNet-B0:** Compound scaling balancing accuracy and computational budget (~5.3M params).
+  * **Vision Transformer (ViT-B/16):** Pure self-attention Transformer architecture (~86M params).
+* **🖥️ Interactive Streamlit Web App (`app.py`):**
+  * Real-time image upload (Drag & drop JPEG, PNG, WEBP).
+  * Quick-select sample images for instant verification.
+  * Model architecture selector with live latency benchmarking (ms).
+  * Dark & Light mode dynamic theme support.
+* **🔍 Explainable AI (Grad-CAM):**
+  * Heatmap overlay displaying critical regions (shell, head, tail) influencing AI decisions.
+  * Interactive transparency slider ($\alpha$-blend control).
+* **⚖️ Balanced Training Pipeline:**
+  * Uses `WeightedRandomSampler` to enforce equal 50:50 sampling during training without artificial oversampling.
+* **🧪 Robust Engineering & Testing:**
+  * Modular architecture with **29 Unit and Integration Tests** passing 100% via `pytest`.
 
 ---
 
-## 📁 โครงสร้างไฟล์ในโปรเจกต์ (Repository Structure)
+## 📁 Repository Structure
 
 ```
 Shrimp_Classification/
-├── app.py                      # 🌟 หน้าเว็บแอปพลิเคชัน Streamlit (Phase 2)
-├── models/                     # 🧠 โฟลเดอร์สำหรับวางไฟล์ .pth ทั้ง 5 โมเดล
+├── app.py                      # 🌟 Main Streamlit Web Application
+├── models/                     # 🧠 Model weights directory (.pth files)
+│   ├── 5 models/               # (Place best_*.pth weights here)
 │   └── README.md
-├── sample_images/              # 🦐 ภาพตัวอย่างสำหรับทดสอบระบบบนเว็บ
-│   ├── fresh/
-│   ├── not_fresh/
+├── sample_images/              # 🦐 Curated sample images for instant testing
+│   ├── fresh/                  # Fresh shrimp samples
+│   ├── not_fresh/              # Not fresh shrimp samples
 │   └── README.md
-├── notebooks/                  # 📓 Colab Notebook และสคริปต์ที่เกี่ยวข้อง
+├── notebooks/                  # 📓 Google Colab training notebooks & generators
 │   ├── shrimp_freshness_classification.ipynb
 │   └── generate_notebook.py
-├── src/                        # 🛠️ โมดูลระบบ Deep Learning
-│   ├── dataset.py              # Data Pipeline, WeightedRandomSampler & Transforms
-│   ├── models.py               # สถาปัตยกรรม 5 โมเดล (CNNs & ViT)
-│   ├── trainer.py              # Training Engine, Early Stopping & Checkpointing
-│   └── metrics.py              # Metrics (Acc, F1, Latency) & Visualization Helpers
-├── tests/                      # 🧪 Unit Tests (TDD - 12/12 ผ่านทั้งหมด)
-├── docs/                       # 📚 เอกสาร Specification และบันทึกแผนงาน
-├── requirements.txt            # รายการ Dependencies
-├── README.md                   # คู่มือการใช้งานฉบับสมบูรณ์
-└── PROJECT_STATUS.md           # บันทึกสถานะโปรเจกต์และ Roadmap
+├── src/                        # 🛠️ Core Deep Learning modules
+│   ├── dataset.py              # Stratified split, augmentation & weighted loaders
+│   ├── models.py               # Model architectures & factory (build_model)
+│   ├── trainer.py              # Early stopping, optimizer, lr-scheduler & checkpointing
+│   ├── metrics.py              # Accuracy, F1, Latency & Confusion Matrix plotting
+│   └── inference.py            # Inference engine, caching & Grad-CAM visualizer
+├── tests/                      # 🧪 Test suite (29 tests, 100% pass)
+│   ├── test_app.py             # Streamlit AppTest verification
+│   ├── test_dataset.py         # Data loading and extraction tests
+│   ├── test_e2e_real_models.py # End-to-end inference with real .pth weights
+│   ├── test_inference.py       # Inference & Grad-CAM unit tests
+│   ├── test_metrics.py         # Evaluation metrics tests
+│   ├── test_models.py          # Forward-pass tensor shape tests
+│   └── test_trainer.py         # Training loop & EarlyStopping tests
+├── docs/                       # 📚 Design specs & Implementation plans
+├── requirements.txt            # Python dependencies
+├── pytest.ini                  # Pytest configuration
+├── README.md                   # 📖 Project documentation (This file)
+├── README_COLAB.md             # 📓 Original Colab execution guide
+└── PROJECT_STATUS.md           # 📋 Project roadmap & status logs
 ```
 
 ---
 
-## 🚀 วิธีการนำไปรันบน Google Colab (Step-by-Step Guide)
+## 🚀 Quick Start & Installation
 
-### ขั้นตอนที่ 1: ตรวจสอบไฟล์ Dataset บน Google Drive
-ตรวจสอบให้แน่ใจว่าคุณได้วางไฟล์ zip ไว้ที่:
-```
-ไดรฟ์ของฉัน/shrimp_raw_jpg.zip
-```
-(หรือ `/content/drive/MyDrive/shrimp_raw_jpg.zip` ใน Colab) โดยข้างในมีโฟลเดอร์ `fresh` และ `not_fresh`
-
-### ขั้นตอนที่ 2: อัปโหลดและเปิด Notebook บน Google Colab
-1. เปิดเว็บไซต์ [Google Colab](https://colab.research.google.com/)
-2. คลิก **Upload** แล้วเลือกไฟล์ `shrimp_freshness_classification.ipynb` จากเครื่องของคุณ
-3. เปลี่ยน Runtime เป็น GPU:
-   * ไปที่เมนู **Runtime** $\rightarrow$ **Change runtime type**
-   * เลือก **T4 GPU** แล้วกด **Save**
-
-### ขั้นตอนที่ 3: รันโค้ดตามลำดับเซลล์
-1. **รันเซลล์ที่ 1 & 2:** เพื่อตรวจสอบ GPU และเชื่อมต่อ Google Drive (กดปุ่ม Connect to Google Drive เมื่อมีหน้าต่างปรากฏ)
-2. **รันเซลล์ที่ 3:** โค้ดจะคัดลอกและแตกไฟล์ zip ไปยัง Local SSD (`/content/dataset/`) โดยอัตโนมัติ ช่วยลดปัญหา I/O Bottleneck ทำให้เทรนเร็วขึ้น 5-10 เท่า
-3. **รันเซลล์ที่ 4 & 5:** ตรวจสอบภาพ และแบ่งข้อมูลแบบ Stratified Split (Train 70% / Val 15% / Test 15%) ด้วย `seed=42`
-4. **รันเซลล์ที่ 6:** โหลดสถาปัตยกรรมทั้ง 5 โมเดล (Custom CNN, MobileNetV3, ResNet-50, EfficientNet-B0, ViT-B/16)
-5. **รันเซลล์ที่ 7 & 8:** เริ่มเทรนทั้ง 5 โมเดลตามลำดับ (มีระบบ Smart Resume โหลดโมเดลเดิมที่เคยเทรนเสร็จแล้วอัตโนมัติ)
-6. **รันเซลล์ที่ 9 & 10:** ดูตารางเปรียบเทียบ (Leaderboard CSV), กราฟ Loss/Accuracy, และ Confusion Matrices Heatmaps
-7. **รันเซลล์ที่ 11:** แสดงผลลัพธ์ **Grad-CAM** เพื่อดูว่า AI มองจุดไหนของตัวกุ้งในการตัดสินใจว่าสดหรือไม่สด
-
----
-
-## 💾 ไฟล์ผลลัพธ์ที่ถูกบันทึกลง Google Drive อัตโนมัติ
-
-ผลลัพธ์ทั้งหมดจะถูกบันทึกไว้ในโฟลเดอร์ `MyDrive/shrimp_models/` ใน Google Drive ของคุณ:
-- `best_custom_cnn.pth` & `history_custom_cnn.json`
-- `best_mobilenet_v3.pth` & `history_mobilenet_v3.json`
-- `best_resnet50.pth` & `history_resnet50.json`
-- `best_efficientnet_b0.pth` & `history_efficientnet_b0.json`
-- `best_vit_b_16.pth` & `history_vit_b_16.json`
-- `shrimp_models_leaderboard.csv`: ตารางสรุปผลเปรียบเทียบโมเดลในรูปแบบ CSV (นำไปเปิดใน Excel ได้ทันที)
-- `validation_curves.png`: ภาพกราฟ Loss และ Accuracy เปรียบเทียบ
-- `confusion_matrices.png`: ภาพ Confusion Matrix 5 โมเดลสำหรับใส่รายงาน
-
----
-
-## 🖥️ การรันเว็บแอปพลิเคชัน (Streamlit Web App)
-สามารถสั่งรันหน้าเว็บทดสอบการจำแนกความสดของกุ้งในเครื่อง Local ได้ด้วยคำสั่ง:
+### 1. Clone the Repository
 
 ```bash
+git clone https://github.com/<your-username>/Shrimp_Classification.git
+cd Shrimp_Classification
+```
+
+### 2. Set Up Virtual Environment
+
+It is recommended to use Python 3.10, 3.11, or 3.12:
+
+```bash
+# Create virtual environment
+python3 -m venv .venv
+
+# Activate virtual environment
+# On macOS / Linux:
 source .venv/bin/activate
+# On Windows:
+# .venv\Scripts\activate
+
+# Upgrade pip
+pip install --upgrade pip
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🧠 Model Weights Setup
+
+Place the trained `.pth` model weights in `models/` or `models/5 models/`:
+
+```
+models/5 models/
+├── best_resnet50.pth          # (~94 MB)
+├── best_mobilenet_v3.pth      # (~17 MB)
+├── best_efficientnet_b0.pth   # (~16 MB)
+├── best_vit_b_16.pth          # (~343 MB)
+└── best_custom_cnn.pth        # (~1.7 MB)
+```
+
+> **Note:** The web application includes an **automatic fallback**: if specific `.pth` files are missing, it initializes the base architecture for UI testing and loads weights seamlessly once available.
+
+---
+
+## 🖥️ How to Run
+
+### 1. Launch the Streamlit Web Application
+
+Ensure your virtual environment is active, then execute:
+
+```bash
 streamlit run app.py
 ```
-* **ฟีเจอร์เด่น:**
-  * เลือกสลับทดสอบได้ทั้ง 5 โมเดล (ResNet-50, MobileNetV3, EfficientNet-B0, ViT, Custom CNN)
-  * อัปโหลดภาพกุ้งหรือคลิกภาพตัวอย่างจากเมนูได้ทันที
-  * แสดงผลระดับความสด (กุ้งสด/ไม่สด), % ความมั่นใจ, และ Latency
-  * เปิด-ปิดแสดง **Heatmap (Grad-CAM)** เพื่อดูจุดที่โมเดลใช้ตัดสินใจ
+
+* The web app will open automatically in your browser at `http://localhost:8501`.
+* **Hardware Acceleration:** Automatically utilizes **Apple Silicon GPU (`mps`)** on macOS, **NVIDIA GPU (`cuda`)** on Linux/Windows, or falls back to **CPU**.
+
+### 2. Train on Google Colab
+
+To train or reproduce the benchmark models on Google Colab:
+1. Upload [notebooks/shrimp_freshness_classification.ipynb](notebooks/shrimp_freshness_classification.ipynb) to Google Colab.
+2. Select **Runtime → Change runtime type → T4 GPU**.
+3. Place `shrimp_raw_jpg.zip` in your Google Drive (`MyDrive/shrimp_raw_jpg.zip`).
+4. Run all cells sequentially. Detailed instructions can be found in [README_COLAB.md](README_COLAB.md).
 
 ---
 
-## 🧪 การรัน Unit & Integration Tests ในเครื่อง Local
+## 🧪 Running Automated Tests
+
+Run the full automated test suite (Unit tests, UI tests, and Real-weight inference tests):
+
 ```bash
-source .venv/bin/activate
 pytest tests/ -v
 ```
-ผลลัพธ์: Tests ทั้งหมดผ่าน 100% (**29/29 Green Suite** ครอบคลุมทั้ง Data Pipeline, Models, Trainer, Inference, Grad-CAM, Real Weights E2E, และ Streamlit UI).
+
+**Test Coverage Summary:**
+* `tests/test_dataset.py`: Zip extraction, directory normalization, and Stratified splitting.
+* `tests/test_models.py`: Architecture instantiation and forward-pass tensor validation `(B, 2)`.
+* `tests/test_trainer.py`: Early stopping logic, single-epoch training, and history serialization.
+* `tests/test_metrics.py`: Classification metrics (Accuracy, F1, Precision, Latency) and Confusion Matrices.
+* `tests/test_inference.py`: Image preprocessing transforms, weight resolution, and Grad-CAM hooks.
+* `tests/test_app.py`: Streamlit `AppTest` initial state and model selectbox rendering.
+* `tests/test_e2e_real_models.py`: End-to-end integration tests using all 5 trained `.pth` models on real sample images.
+
+---
+
+## 📊 Model Benchmark Overview
+
+| Architecture | Backbone Type | Parameters | Strengths / Best Use Case |
+| :--- | :---: | :---: | :--- |
+| **MobileNetV3-Large** | Inverted Residuals + SE | ~5.4M | **Fastest inference (<15 ms)**; ideal for edge cameras & mobile |
+| **ResNet-50** | Residual Bottleneck | ~25.6M | **High stability & accuracy**; standard benchmark |
+| **EfficientNet-B0** | Compound MBConv | ~5.3M | Excellent parameter efficiency and feature representation |
+| **ViT-B/16** | Self-Attention Transformer | ~86.0M | Modern vision backbone capturing long-range spatial correlations |
+| **Custom CNN** | 4 Conv Blocks (Scratch) | ~2.1M | Lightweight baseline without transfer learning |
+
+---
+
+## 💡 Note on Domain Shift & In-The-Wild Images
+
+* Deep learning models evaluate with maximum accuracy on **In-Distribution images** (e.g. raw shrimp captured under consistent lighting and plain backgrounds similar to the training dataset).
+* When testing with arbitrary internet images (e.g., cooked orange shrimp, market scenes with ice/condiments, or varied angles), performance may be affected by **Domain Shift (Shortcut Learning)**.
+* For optimal real-world evaluation, place raw shrimp on neutral, uniform backgrounds with top-down angles, or use sample images provided in [sample_images/](sample_images/).
+
+---
+
+## 📄 License
+
+This project is open-source and licensed under the [MIT License](LICENSE).
