@@ -52,22 +52,27 @@ st.markdown(
     }
 
     /* ------------------------------------------------------------- */
-    /* Remove Streamlit header to prevent overlap and unclickable UI */
+    /* Remove Streamlit header toolbar to prevent overlap & keep layout clean */
     /* ------------------------------------------------------------- */
     header[data-testid="stHeader"],
     [data-testid="stHeader"],
-    .stAppHeader,
-    [data-testid="stToolbar"] {
-        display: none !important;
-        visibility: hidden !important;
+    .stAppHeader {
         height: 0 !important;
         min-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: transparent !important;
         pointer-events: none !important;
+        overflow: visible !important;
+        border: none !important;
     }
 
-    /* Push Main Content up cleanly without header interference */
+    [data-testid="stToolbar"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Push Main Content up cleanly */
     .main .block-container,
     .block-container,
     [data-testid="stMainBlockContainer"],
@@ -78,13 +83,18 @@ st.markdown(
         padding-right: 2.5rem !important;
     }
 
-    /* Sidebar: Hide empty stSidebarHeader (takes 70px) and push logo to top */
+    /* Sidebar: Keep collapse button in DOM (for JS click) while removing top gap */
     [data-testid="stSidebarHeader"] {
-        display: none !important;
+        position: absolute !important;
+        top: 0 !important;
+        right: 0 !important;
+        width: 0 !important;
         height: 0 !important;
-        min-height: 0 !important;
+        overflow: hidden !important;
         margin: 0 !important;
         padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
 
     [data-testid="stSidebar"] [data-testid="stSidebarContent"],
@@ -109,9 +119,10 @@ st.markdown(
         visibility: hidden !important;
     }
 
-    /* Eliminate phantom height from style markdown containers */
+    /* Eliminate phantom height from style and script containers */
     div[data-testid="stElementContainer"]:has(style),
-    div.element-container:has(style) {
+    div.element-container:has(style),
+    div[data-testid="stHtml"]:has(script:only-child) {
         position: absolute !important;
         height: 0 !important;
         margin: 0 !important;
@@ -138,6 +149,31 @@ st.markdown(
         color: var(--text-color);
         opacity: 0.75;
         letter-spacing: 0.3px;
+    }
+    .sidebar-toggle-btn {
+        background: transparent;
+        border: 1px solid rgba(125, 140, 160, 0.25);
+        border-radius: 6px;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text-color);
+        opacity: 0.75;
+        transition: all 0.18s ease;
+        line-height: 1;
+        margin-right: 2px;
+    }
+    .sidebar-toggle-btn:hover {
+        opacity: 1;
+        color: #0284c7;
+        background: rgba(2, 132, 199, 0.1);
+        border-color: rgba(2, 132, 199, 0.35);
+        transform: scale(1.06);
+    }
+    .sidebar-toggle-btn:active {
+        transform: scale(0.95);
     }
     .crumb-separator {
         opacity: 0.45;
@@ -1071,10 +1107,12 @@ st.markdown(
     """
     <div class="topbar-row">
         <div class="workspace-crumb">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.65; flex-shrink: 0;">
-                <rect width="18" height="18" x="3" y="3" rx="2" />
-                <path d="M9 3v18" />
-            </svg>
+            <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" type="button" title="ซ่อน/แสดงแถบด้านข้าง (Toggle Sidebar)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="3" rx="2" />
+                    <path d="M9 3v18" />
+                </svg>
+            </button>
             <span>Workspace</span>
             <span class="crumb-separator">
                 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.45; vertical-align: middle;">
@@ -1108,6 +1146,95 @@ st.markdown(
     </header>
     """,
     unsafe_allow_html=True,
+)
+
+# JavaScript helper for Interactive Sidebar Toggle
+st.html(
+    """
+    <script>
+    (function() {
+        function getDoc() {
+            try {
+                return window.parent ? window.parent.document : document;
+            } catch(e) {
+                return document;
+            }
+        }
+
+        function toggleSidebar() {
+            const doc = getDoc();
+            const sidebar = doc.querySelector('[data-testid="stSidebar"]');
+            let isExpanded = true;
+            if (sidebar) {
+                const ariaExp = sidebar.getAttribute('aria-expanded');
+                if (ariaExp !== null) {
+                    isExpanded = (ariaExp === 'true');
+                } else {
+                    const rect = sidebar.getBoundingClientRect();
+                    isExpanded = rect.width > 50;
+                }
+            }
+
+            if (isExpanded) {
+                const collapseBtn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                                    doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+                if (collapseBtn) {
+                    collapseBtn.click();
+                    return;
+                }
+            } else {
+                const expandBtn = doc.querySelector('[data-testid="stExpandSidebarButton"]') ||
+                                  doc.querySelector('[data-testid="stExpandSidebarButton"] button');
+                if (expandBtn) {
+                    expandBtn.click();
+                    return;
+                }
+            }
+
+            // Fallback
+            const anyCollapse = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                                doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+            const anyExpand = doc.querySelector('[data-testid="stExpandSidebarButton"]') ||
+                              doc.querySelector('[data-testid="stExpandSidebarButton"] button');
+            if (isExpanded && anyCollapse) {
+                anyCollapse.click();
+            } else if (anyExpand) {
+                anyExpand.click();
+            } else if (anyCollapse) {
+                anyCollapse.click();
+            }
+        }
+
+        function initSidebarToggle() {
+            const doc = getDoc();
+            const btn = doc.getElementById('sidebar-toggle-btn');
+            if (btn && btn.dataset.bound !== 'true') {
+                btn.dataset.bound = 'true';
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSidebar();
+                };
+            }
+        }
+
+        initSidebarToggle();
+        setInterval(initSidebarToggle, 250);
+
+        const doc = getDoc();
+        if (doc && !doc._sidebarKeybound) {
+            doc._sidebarKeybound = true;
+            doc.addEventListener('keydown', function(e) {
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+                    e.preventDefault();
+                    toggleSidebar();
+                }
+            });
+        }
+    })();
+    </script>
+    """,
+    unsafe_allow_javascript=True,
 )
 
 # ---------------------------------------------------------
