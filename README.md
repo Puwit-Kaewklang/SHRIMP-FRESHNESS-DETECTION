@@ -62,9 +62,9 @@ shrimp-freshness-cnn/
 1. **รันเซลล์ที่ 1 & 2:** เพื่อตรวจสอบ GPU และเชื่อมต่อ Google Drive (กดปุ่ม Connect to Google Drive เมื่อมีหน้าต่างปรากฏ)
 2. **รันเซลล์ที่ 3:** โค้ดจะคัดลอกและแตกไฟล์ zip ไปยัง Local SSD (`/content/dataset/`) โดยอัตโนมัติ ช่วยลดปัญหา I/O Bottleneck ทำให้เทรนเร็วขึ้น 5-10 เท่า
 3. **รันเซลล์ที่ 4 & 5:** ตรวจสอบภาพ และแบ่งข้อมูลแบบ Stratified Split (Train 70% / Val 15% / Test 15%) ด้วย `seed=42`
-4. **รันเซลล์ที่ 6:** โหลดสถาปัตยกรรมทั้ง 4 โมเดล
-5. **รันเซลล์ที่ 7 & 8:** เริ่มเทรนทั้ง 4 โมเดลตามลำดับ ระบบจะหยุดอัตโนมัติหาก Val Loss ไม่ดีขึ้น (Early Stopping) และบันทึกเฉพาะโมเดลที่ดีที่สุดลง Google Drive
-6. **รันเซลล์ที่ 9 & 10:** ดูตารางเปรียบเทียบ (Leaderboard), กราฟ Loss/Accuracy, และ Confusion Matrices Heatmaps
+4. **รันเซลล์ที่ 6:** โหลดสถาปัตยกรรมทั้ง 5 โมเดล (Custom CNN, MobileNetV3, ResNet-50, EfficientNet-B0, ViT-B/16)
+5. **รันเซลล์ที่ 7 & 8:** เริ่มเทรนทั้ง 5 โมเดลตามลำดับ (มีระบบ Smart Resume โหลดโมเดลเดิมที่เคยเทรนเสร็จแล้วอัตโนมัติ)
+6. **รันเซลล์ที่ 9 & 10:** ดูตารางเปรียบเทียบ (Leaderboard CSV), กราฟ Loss/Accuracy, และ Confusion Matrices Heatmaps
 7. **รันเซลล์ที่ 11:** แสดงผลลัพธ์ **Grad-CAM** เพื่อดูว่า AI มองจุดไหนของตัวกุ้งในการตัดสินใจว่าสดหรือไม่สด
 
 ---
@@ -72,13 +72,22 @@ shrimp-freshness-cnn/
 ## 💾 ไฟล์ผลลัพธ์ที่ถูกบันทึกลง Google Drive อัตโนมัติ
 
 ผลลัพธ์ทั้งหมดจะถูกบันทึกไว้ในโฟลเดอร์ `MyDrive/shrimp_models/` ใน Google Drive ของคุณ:
-- `best_custom_cnn.pth`: Weights โมเดล Custom CNN ที่ดีที่สุด
-- `best_mobilenet_v3.pth`: Weights โมเดล MobileNetV3 ที่ดีที่สุด
-- `best_resnet50.pth`: Weights โมเดล ResNet-50 ที่ดีที่สุด
-- `best_efficientnet_b0.pth`: Weights โมเดล EfficientNet-B0 ที่ดีที่สุด
+- `best_custom_cnn.pth` & `history_custom_cnn.json`
+- `best_mobilenet_v3.pth` & `history_mobilenet_v3.json`
+- `best_resnet50.pth` & `history_resnet50.json`
+- `best_efficientnet_b0.pth` & `history_efficientnet_b0.json`
+- `best_vit_b_16.pth` & `history_vit_b_16.json`
 - `shrimp_models_leaderboard.csv`: ตารางสรุปผลเปรียบเทียบโมเดลในรูปแบบ CSV (นำไปเปิดใน Excel ได้ทันที)
 - `validation_curves.png`: ภาพกราฟ Loss และ Accuracy เปรียบเทียบ
-- `confusion_matrices.png`: ภาพ Confusion Matrix 4 โมเดลสำหรับใส่รายงาน
+- `confusion_matrices.png`: ภาพ Confusion Matrix 5 โมเดลสำหรับใส่รายงาน
+
+---
+
+## 🚀 แผนงานถัดไป: Phase 2 - Streamlit Web Application
+อ่านรายละเอียดความคืบหน้า ประวัติการแก้ปัญหา และ Roadmap เต็มได้ที่:  
+👉 **`PROJECT_STATUS.md`**
+
+เมื่อย้ายโฟลเดอร์เรียบร้อยแล้ว เราจะเริ่มพัฒนาไฟล์ `app.py` เพื่อสร้างเว็บแอปพลิเคชันสำหรับอัปโหลดภาพกุ้งและทำนายผลทันที!
 
 ---
 
@@ -87,4 +96,4 @@ shrimp-freshness-cnn/
 source .venv/bin/activate
 pytest tests/ -v
 ```
-ผลลัพธ์: Tests ทั้งหมดผ่าน 100% (Green Suite).
+ผลลัพธ์: Tests ทั้งหมดผ่าน 100% (12/12 Green Suite).
