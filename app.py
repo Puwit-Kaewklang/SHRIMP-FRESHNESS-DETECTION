@@ -112,12 +112,15 @@ st.markdown(
     .main-title {
         font-size: 32px;
         font-weight: 700;
-        color: #1d283d !important;
+        color: #000000 !important;
         margin: 0 0 8px 0;
         line-height: 1.3;
         letter-spacing: -0.01em;
     }
-    .main-title .ai-highlight, .main-title span {
+    .main-title .title-black-text {
+        color: #000000 !important;
+    }
+    .main-title .ai-highlight {
         color: #00a7f5 !important;
         font-weight: 800;
     }
@@ -608,18 +611,16 @@ st.markdown(
         font-family: 'Outfit', 'Prompt', sans-serif;
         font-size: 22px;
         font-weight: 700;
-        color: #1d283d !important;
+        color: #000000 !important;
         margin: 0;
         line-height: 1.2;
     }
-    .sidebar-detail h1 span, .sidebar-detail h1 .ai-highlight {
+    .sidebar-detail h1 .title-black-text {
+        color: #000000 !important;
+    }
+    .sidebar-detail h1 .ai-highlight {
         color: #00a7f5 !important;
         font-weight: 800;
-    }
-    @media (prefers-color-scheme: dark) {
-        .main-title, .sidebar-detail h1 {
-            color: #f1f5f9 !important;
-        }
     }
     .sidebar-detail p {
         font-family: 'Outfit', sans-serif;
@@ -883,7 +884,7 @@ st.sidebar.markdown(
             </svg>
         </div>
         <div class="sidebar-detail">
-            <h1>ShrimpGuard <span class="ai-highlight">AI</span></h1>
+            <h1><span class="title-black-text" style="color: #000000 !important;">ShrimpGuard</span> <span class="ai-highlight" style="color: #00a7f5 !important;">AI</span></h1>
             <p>QUALITY ANALYSIS</p>
         </div>
     </div>
@@ -1015,7 +1016,7 @@ st.markdown(
             SHRIMP FRESHNESS DETECTION
         </div>
         <!-- ระบบจำแนกความสดของกุ้งด้วย AI -->
-        <h2 class="main-title">ระบบจำแนกความสดของกุ้งด้วย <span class="ai-highlight">AI</span></h2>
+        <h2 class="main-title"><span class="title-black-text" style="color: #000000 !important;">ระบบจำแนกความสดของกุ้งด้วย</span> <span class="ai-highlight" style="color: #00a7f5 !important;">AI</span></h2>
         <p class="main-subtitle">ตรวจสอบคุณภาพความสดของกุ้งด้วยเทคโนโลยี Deep Learning (CNNs & Vision Transformer)</p>
     </header>
     """,
