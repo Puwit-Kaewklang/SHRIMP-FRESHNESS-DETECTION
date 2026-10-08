@@ -51,45 +51,88 @@ st.markdown(
         font-family: "Material Symbols Rounded", "Material Icons", sans-serif !important;
     }
 
+    /* Compact Header & Top Container - Push Content to Top */
+    header[data-testid="stHeader"],
+    [data-testid="stHeader"] {
+        background: transparent !important;
+        height: 2.25rem !important;
+        min-height: 2.25rem !important;
+        z-index: 50 !important;
+    }
+
+    /* Reduce Streamlit's huge default top padding (normally 6rem) */
+    .main .block-container,
+    .block-container,
+    [data-testid="stMainBlockContainer"],
+    [data-testid="block-container"] {
+        padding-top: 1.25rem !important;
+        padding-bottom: 2.5rem !important;
+        padding-left: 2.5rem !important;
+        padding-right: 2.5rem !important;
+    }
+
+    /* Reduce sidebar top padding so brand aligns near top */
+    [data-testid="stSidebar"] .block-container,
+    [data-testid="stSidebarUserContent"],
+    [data-testid="stSidebarContent"],
+    section[data-testid="stSidebar"] > div:first-child {
+        padding-top: 1.25rem !important;
+    }
+
+    /* Eliminate phantom height from style markdown containers */
+    div[data-testid="stElementContainer"]:has(style),
+    div.element-container:has(style) {
+        position: absolute !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+    }
+
     /* Topbar Breadcrumb & Badge */
     .topbar-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-top: 0;
         margin-bottom: 12px;
-        padding-bottom: 6px;
+        padding-bottom: 4px;
     }
     .workspace-crumb {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-size: 13px;
+        font-size: 13.5px;
         font-family: 'Outfit', sans-serif;
         color: var(--text-color);
-        opacity: 0.7;
-        letter-spacing: 0.5px;
+        opacity: 0.75;
+        letter-spacing: 0.3px;
     }
     .crumb-separator {
-        opacity: 0.4;
+        opacity: 0.45;
+        display: inline-flex;
+        align-items: center;
     }
     .topbar-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         font-family: 'Outfit', sans-serif;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 700;
-        letter-spacing: 1px;
+        letter-spacing: 0.8px;
         color: #0284c7;
-        background: rgba(2, 132, 199, 0.1);
-        border: 1px solid rgba(2, 132, 199, 0.25);
+        background: rgba(2, 132, 199, 0.08);
+        border: 1px solid rgba(2, 132, 199, 0.22);
         padding: 5px 12px;
         border-radius: 999px;
     }
 
     /* Page Header */
     .page-header {
-        margin-bottom: 26px;
+        margin-top: 0;
+        margin-bottom: 20px;
     }
     .eyebrow {
         display: inline-flex;
@@ -98,9 +141,9 @@ st.markdown(
         font-family: 'Outfit', sans-serif;
         font-size: 12px;
         font-weight: 700;
-        letter-spacing: 1.8px;
+        letter-spacing: 1.6px;
         color: #0284c7;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         text-transform: uppercase;
     }
     .eyebrow-dot {
@@ -110,10 +153,10 @@ st.markdown(
         background-color: #0284c7;
     }
     .main-title {
-        font-size: 32px;
+        font-size: 30px;
         font-weight: 700;
         color: #000000 !important;
-        margin: 0 0 8px 0;
+        margin: 0 0 6px 0;
         line-height: 1.3;
         letter-spacing: -0.01em;
     }
@@ -125,7 +168,7 @@ st.markdown(
         font-weight: 800;
     }
     .main-subtitle {
-        font-size: 16px;
+        font-size: 15px;
         color: var(--text-color);
         opacity: 0.8;
         margin: 0;
@@ -996,12 +1039,24 @@ st.markdown(
     """
     <div class="topbar-row">
         <div class="workspace-crumb">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.65; flex-shrink: 0;">
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M9 3v18" />
+            </svg>
             <span>Workspace</span>
-            <span class="crumb-separator">/</span>
+            <span class="crumb-separator">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.45; vertical-align: middle;">
+                    <path d="m9 18 6-6-6-6" />
+                </svg>
+            </span>
             <strong>Freshness analysis</strong>
         </div>
         <span class="topbar-badge">
-            🛡️ AI QUALITY INSPECTION
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                <path d="m9 12 2 2 4-4" />
+            </svg>
+            AI QUALITY INSPECTION
         </span>
     </div>
     <header class="page-header">
